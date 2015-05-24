@@ -15,8 +15,8 @@
 ;; The library currently supports using org-contacts to maintain your contacts
 ;; database.
 
-;; You can configure the frequency at which you wish to contact a
-;; person by adding a `KEEPINTOUCH_INTERVAL' property to your contacts.
+;; You can configure the frequency at which you wish to contact a person by
+;; adding a `KEEPINTOUCH_INTERVAL' property to your contacts.
 
 ;; You can add information about when you last contacted a person, by using the
 ;; `keepintouch' function.  This adds a LOGNOTE to your contacts db entry for
@@ -28,3 +28,34 @@
 
 ;; FIXME: We need a way of showing upto N people to contact from the backlog,
 ;; ala org-contacts anniversary stuff.
+
+(defgroup keepintouch nil
+  "Options for keepintouch.")
+
+(defcustom keepintouch-interval-property "KEEPINTOUCH_INTERVAL"
+  "Name of the property for keepintouch interval."
+  :type 'string
+  :group 'keepintouch)
+
+(defcustom keepintouch-last-contacted-property "KEEPINTOUCH_LAST_CONTACTED"
+  "Name of the property for last contacted timestamp."
+  :type 'string
+  :group 'keepintouch)
+
+(defun keepintouch (name &optional time)
+  "Update last contacted time for the contact.
+
+If TIME is nil, `org-log-note-effective-time' is used."
+  ;;FIXME: Currently the exact name is required.  Later, allow
+  ;;email/phone/nick.  More smartness!
+  (unless time
+    (setq time org-log-note-effective-time))
+  (let ((contact (org-contacts-filter (concat "^" name "$"))))
+    (if contact
+        (let ((marker (cadar contact))
+              (timestamp (format-time-string
+                          (org-time-stamp-format 'long t) time)))
+          (switch-to-buffer-other-window (marker-buffer marker))
+          (goto-char marker)
+          (org-set-property keepintouch-last-contacted-property timestamp))
+      (error (format "No contact %s found!" name)))))
