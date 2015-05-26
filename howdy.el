@@ -38,8 +38,8 @@
 ;; To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
 ;; example, add an entry like the one below to one of your org-contacts-files.
 ;;
-;; * Keep in touch
-;; %%(howdy-contacts)
+;; : * Keep in touch
+;; : %%(howdy-contacts)
 
 (require 'org-contacts)
 

@@ -1,0 +1,33 @@
+* howdy --- A library to help you keep in touch with people.
+
+Copyright (C) 2015 Puneeth Chaganti
+  - Author: Puneeth Chaganti <punchagan@muse-amuse.in>
+  - Created: 24 May 2015
+  - Keywords: contacts, org-mode, org-contacts
+  - Homepage: http://github.com/punchagan/howdy
+
+This file is NOT part of GNU Emacs.
+
+Licensed under the [[http://www.gnu.org/licenses/][GPL version 3]] or later.
+-----
+
+* Commentary
+
+Howdy! is a library to help you keep in touch with people.
+
+The library currently only supports using org-contacts to maintain your
+contacts database.
+
+You can configure the frequency at which you wish to contact a person by
+adding a `HOWDY_INTERVAL' property to your contacts.
+
+You can update information about when you last contacted a person, by using
+the `howdy-contacted' function.  For example, (howdy-contacted "John Doe").
+
+To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
+example, add an entry like the one below to one of your org-contacts-files.
+
+: * Keep in touch
+: %%(howdy-contacts)
+
+README.org generated from the library header in howdy.el by [[https://github.com/punchagan/h2o][h2o]]
