@@ -97,7 +97,8 @@ If TIME is nil, `org-log-note-effective-time' is used."
                howdy-last-contacted-property
                (format-time-string
                 (org-time-stamp-format 'long t) time))
-            (message "Not updating with older timestamp.")))
+            (message "Not updating with older timestamp."))
+          (save-buffer))
       (error (format "No contact %s found!" name)))))
 
 (defun howdy-howdy (&optional format)
