@@ -139,7 +139,6 @@ This function can only be called interactively.  Use
   (let* ((name (org-contacts-completing-read "Name: "))
          (time (org-read-date t t nil "Time: " org-log-note-effective-time))
          (contact (howdy--find-contact `((:name . ,name)))))
-    (print contact)
     (if contact (howdy--contacted-contact contact time)
       (error (format "No contact %s found!" name)))))
 
