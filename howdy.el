@@ -98,19 +98,19 @@ The following replacements are available:
   "Update last contacted time for the contact.
 
 If TIME is nil, `org-log-note-effective-time' is used."
-  (let (old-time)
-    (howdy--jump-to-contact contact)
-    (setq old-time
-          (ignore-errors
-            (org-parse-time-string
-             (cdr (assoc-string howdy-last-contacted-property (org-entry-properties))))))
-    (if (or (not old-time) (time-less-p (apply 'encode-time old-time) time))
-        (org-set-property
-         howdy-last-contacted-property
-         (format-time-string
-          (org-time-stamp-format 'long t) time))
-      (message "Not updating with older timestamp."))
-    (save-buffer)))
+  (howdy--with-contact
+   contact
+   (let (old-time)
+     (setq old-time
+           (ignore-errors
+             (org-parse-time-string
+              (cdr (assoc-string howdy-last-contacted-property (org-entry-properties))))))
+     (if (or (not old-time) (time-less-p (apply 'encode-time old-time) time))
+         (org-set-property
+          howdy-last-contacted-property
+          (format-time-string
+           (org-time-stamp-format 'long t) time))
+       (message "Not updating with older timestamp.")))))
 
 (defun howdy--find-contact (info)
   "Find the contact using the given info."
@@ -122,11 +122,15 @@ If TIME is nil, `org-log-note-effective-time' is used."
       (setq props `("EMAIL" . ,email)))
     (org-contacts-filter (concat "^" name "$") nil props)))
 
-(defun howdy--jump-to-contact (contact)
-  "Jump to a given contact."
-  (let ((marker (cadar contact)))
-    (switch-to-buffer-other-window (marker-buffer marker))
-    (goto-char marker)))
+(defmacro howdy--with-contact (contact &rest body)
+  "Eval the BODY with point at the given contact."
+  `(let ((marker (cadar contact)))
+     (with-current-buffer (marker-buffer marker)
+       (save-excursion
+         (save-restriction
+           (goto-char marker)
+           ,@body))
+       (save-buffer))))
 
 (defun howdy-contacted ()
   "Update last contacted time for the contact.
@@ -176,9 +180,9 @@ INTERVAL is the number of days to set as HOWDY_INTERVAL."
   (let ((contact (org-contacts-filter (concat "^" name "$"))))
     (if (null contact)
         (error (format "No contact %s found!" name))
-      (howdy--jump-to-contact contact)
-      (org-set-property howdy-interval-property (number-to-string interval))
-      (save-buffer))))
+      (howdy--with-contact
+       contact
+       (org-set-property howdy-interval-property (number-to-string interval))))))
 
 (provide 'howdy)
 
