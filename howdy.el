@@ -112,20 +112,34 @@ If TIME is nil, `org-log-note-effective-time' is used."
       (message "Not updating with older timestamp."))
     (save-buffer)))
 
+(defun howdy--find-contact (info)
+  "Find the contact using the given info."
+  ;; FIXME: Allow phone/nick/IRC/twitter/etc.
+  (let ((name (cdr (assoc :name info)))
+        (email (cdr (assoc :email info)))
+        props)
+    (when email
+      (setq props `("EMAIL" . ,email)))
+    (org-contacts-filter (concat "^" name "$") nil props)))
+
 (defun howdy--jump-to-contact (contact)
   "Jump to a given contact."
   (let ((marker (cadar contact)))
     (switch-to-buffer-other-window (marker-buffer marker))
     (goto-char marker)))
 
-(defun howdy-contacted (name &optional time)
+(defun howdy-contacted ()
   "Update last contacted time for the contact.
 
-If TIME is nil, `org-log-note-effective-time' is used."
-  ;;FIXME: Allow email/phone/nick/etc.
-  (interactive (list (org-contacts-completing-read "Name: ")
-                     (org-read-date t t nil "Time: " org-log-note-effective-time)))
-  (let ((contact (org-contacts-filter (concat "^" name "$"))))
+If TIME is nil, `org-log-note-effective-time' is used.
+
+This function can only be called interactively.  Use
+`howdy--contacted-contact' for doing stuff programmatically."
+  (interactive)
+  (let* ((name (org-contacts-completing-read "Name: "))
+         (time (org-read-date t t nil "Time: " org-log-note-effective-time))
+         (contact (howdy--find-contact `((:name . ,name)))))
+    (print contact)
     (if contact (howdy--contacted-contact contact time)
       (error (format "No contact %s found!" name)))))
 
