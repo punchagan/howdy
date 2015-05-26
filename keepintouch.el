@@ -29,6 +29,8 @@
 ;; FIXME: We need a way of showing upto N people to contact from the backlog,
 ;; ala org-contacts anniversary stuff.
 
+(require 'org-contacts)
+
 (defgroup keepintouch nil
   "Options for keepintouch.")
 
