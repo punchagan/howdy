@@ -51,6 +51,11 @@
   :type 'string
   :group 'howdy)
 
+(defcustom howdy-interval-default 15
+  "The default number of days to use as howdy interval."
+  :type 'integer
+  :group 'howdy)
+
 (defcustom howdy-last-contacted-property "LAST_HOWDY"
   "Name of the property for last contacted timestamp."
   :type 'string
@@ -133,6 +138,28 @@ Format is a string matching the following format specification:
                          (?h . ,(car contact))
                          (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                          (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))))
+
+
+(defun howdy-set-interval (&optional name interval)
+  "Set the HOWDY_INTERVAL for a contact.
+
+INTERVAL is the number of days to set as HOWDY_INTERVAL."
+  (interactive)
+  (unless name
+    (setq name (org-contacts-completing-read "Name: ")))
+  (unless interval
+    (setq interval
+          (read-number (format "%s (days): " howdy-interval-property)
+                       howdy-interval-default)))
+  (let ((contact (org-contacts-filter (concat "^" name "$")))
+        marker)
+    (if (null contact)
+        (error (format "No contact %s found!" name))
+      (setq marker (cadar contact))
+      (switch-to-buffer-other-window (marker-buffer marker))
+      (goto-char marker)
+      (org-set-property howdy-interval-property (number-to-string interval))
+      (save-buffer))))
 
 (provide 'howdy)
 
