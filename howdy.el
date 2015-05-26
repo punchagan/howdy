@@ -57,10 +57,9 @@ The following replacements are available:
   "Update last contacted time for the contact.
 
 If TIME is nil, `org-log-note-effective-time' is used."
-  ;;FIXME: Currently the exact name is required.  Later, allow
-  ;;email/phone/nick.  More smartness!
-  (unless time
-    (setq time org-log-note-effective-time))
+  ;;FIXME: Allow email/phone/nick/etc.
+  (interactive (list (org-contacts-completing-read "Name: ")
+                     (org-read-date t t nil "Time: " org-log-note-effective-time)))
   (let ((contact (org-contacts-filter (concat "^" name "$"))))
     (if contact
         (let ((marker (cadar contact))
