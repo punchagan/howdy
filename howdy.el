@@ -53,6 +53,28 @@ The following replacements are available:
   :type 'string
   :group 'howdy)
 
+(defun howdy--backlog-contact-p (contact)
+  (let ((interval
+         (ignore-errors
+           (string-to-number
+            (cdr (assoc-string howdy-interval-property (caddr contact))))))
+        (last-contacted
+         (ignore-errors
+           (org-parse-time-string
+            (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))
+    (when interval
+      (if last-contacted
+          (< interval
+             (time-to-number-of-days
+              (time-since (apply 'encode-time last-contacted))))
+        t))))
+
+(defun howdy--backlog-contacts ()
+  "Returns a list of contacts who need to be contacted."
+  (loop for contact in (org-contacts-db)
+	  if (howdy--backlog-contact-p contact)
+	  collect contact))
+
 (defun howdy-contacted (name &optional time)
   "Update last contacted time for the contact.
 
@@ -82,33 +104,12 @@ Format is a string matching the following format specification:
   (let ()
     (unless format (setq format howdy-agenda-entry-format))
     (loop for contact in (howdy--backlog-contacts)
-          collect (format-spec format
-                               `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
-                                 (?h . ,(car contact))
-                                 (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
-                                 (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))))
-
-(defun howdy--backlog-contacts ()
-  "Returns a list of contacts who need to be contacted."
-  (loop for contact in (org-contacts-db)
-	  if (howdy--backlog-contact-p contact)
-	  collect contact))
-
-(defun howdy--backlog-contact-p (contact)
-  (let ((interval
-         (ignore-errors
-           (string-to-number
-            (cdr (assoc-string howdy-interval-property (caddr contact))))))
-        (last-contacted
-         (ignore-errors
-           (org-parse-time-string
-            (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))
-    (when interval
-      (if last-contacted
-          (< interval
-             (time-to-number-of-days
-              (time-since (apply 'encode-time last-contacted))))
-        t))))
+          collect
+          (format-spec format
+                       `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
+                         (?h . ,(car contact))
+                         (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
+                         (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))))
 
 (provide 'howdy)
 
