@@ -85,11 +85,19 @@ If TIME is nil, `org-log-note-effective-time' is used."
   (let ((contact (org-contacts-filter (concat "^" name "$"))))
     (if contact
         (let ((marker (cadar contact))
-              (timestamp (format-time-string
-                          (org-time-stamp-format 'long t) time)))
+              old-time)
           (switch-to-buffer-other-window (marker-buffer marker))
           (goto-char marker)
-          (org-set-property howdy-last-contacted-property timestamp))
+          (setq old-time
+                (ignore-errors
+                  (org-parse-time-string
+                   (cdr (assoc-string howdy-last-contacted-property (org-entry-properties))))))
+          (if (or (not old-time) (time-less-p (apply 'encode-time old-time) time))
+              (org-set-property
+               howdy-last-contacted-property
+               (format-time-string
+                (org-time-stamp-format 'long t) time))
+            (message "Not updating with older timestamp.")))
       (error (format "No contact %s found!" name)))))
 
 (defun howdy-howdy (&optional format)
