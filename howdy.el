@@ -136,7 +136,8 @@ If TIME is nil, `current-time' is used."
          (save-restriction
            (goto-char marker)
            ,@body))
-       (save-buffer))))
+       (save-buffer))
+     (run-with-idle-timer 1 nil 'org-contacts-db)))
 
 (defun howdy-contacted ()
   "Update last contacted time for the contact.
