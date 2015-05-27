@@ -94,6 +94,13 @@ The following replacements are available:
         if (howdy--backlog-contact-p contact)
         collect contact))
 
+(defun howdy--contacted (info time)
+  "Update last contacted time for the contact.
+
+If TIME is nil, `org-log-note-effective-time' is used."
+  (let ((contact (howdy--find-contact info)))
+    (when contact (howdy--contacted-contact contact time))))
+
 (defun howdy--contacted-contact (contact time)
   "Update last contacted time for the contact.
 
@@ -138,7 +145,7 @@ If TIME is nil, `org-log-note-effective-time' is used."
 If TIME is nil, `org-log-note-effective-time' is used.
 
 This function can only be called interactively.  Use
-`howdy--contacted-contact' for doing stuff programmatically."
+`howdy--contacted' for doing stuff programmatically."
   (interactive)
   (let* ((name (org-contacts-completing-read "Name: "))
          (time (org-read-date t t nil "Time: " org-log-note-effective-time))
