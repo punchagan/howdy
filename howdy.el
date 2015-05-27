@@ -33,7 +33,7 @@
 ;; adding a `HOWDY_INTERVAL' property to your contacts.
 
 ;; You can update information about when you last contacted a person, by using
-;; the `howdy-contacted' function.  For example, (howdy-contacted "John Doe").
+;; the `howdy-contacted' function.
 
 ;; To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
 ;; example, add an entry like the one below to one of your org-contacts-files.
