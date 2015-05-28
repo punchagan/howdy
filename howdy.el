@@ -33,7 +33,7 @@
 ;; adding a `HOWDY_INTERVAL' property to your contacts.
 
 ;; You can update information about when you last contacted a person, by using
-;; the `howdy-contacted' function.
+;; the `howdy' function.
 
 ;; To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
 ;; example, add an entry like the one below to one of your org-contacts-files.
@@ -151,7 +151,7 @@ If TIME is nil, `current-time' is used."
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                  (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))
 
-(defun howdy-contacted ()
+(defun howdy ()
   "Update last contacted time for the contact.
 
 If TIME is nil, `current-time' is used.
