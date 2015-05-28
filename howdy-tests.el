@@ -99,6 +99,21 @@
                      (contact (howdy--find-contact info)))
                 (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
+(ert-deftest should-not-update-with-close-timestamp ()
+  (with-howdy-test-setup
+   (let* ((name "John Doe")
+          (timestamp "[2015-05-28 Thu 11:00]")
+          (new-timestamp "[2015-05-28 Thu 11:10]")
+          (time (apply 'encode-time (org-parse-time-string timestamp)))
+          (new-time (apply 'encode-time (org-parse-time-string new-timestamp)))
+          (info `((:name . ,name))))
+     (howdy--contacted info time)
+     (howdy--contacted info new-time)
+     (should (string=
+              timestamp
+              (let* ((org-contacts-last-update nil)
+                     (contact (howdy--find-contact info)))
+                (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
 (ert-deftest should-show-howdy-pending-contacts ()
   (with-howdy-test-setup
@@ -110,7 +125,8 @@
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy--contacted info time)
-     (should (member msg (howdy-howdy))))))
+     (should (let* ((org-contacts-last-update nil))
+               (member msg (howdy-howdy)))))))
 
 (ert-deftest should-not-show-update-contacts ()
   (with-howdy-test-setup
@@ -120,4 +136,5 @@
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy--contacted info)
-     (should (null (member msg (howdy-howdy)))))))
+     (should (let* ((org-contacts-last-update nil))
+               (null (member msg (howdy-howdy))))))))
