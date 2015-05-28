@@ -156,9 +156,8 @@ This function can only be called interactively.  Use
   (interactive)
   (let* ((name (org-contacts-completing-read "Name: "))
          (time (org-read-date t t nil "Time: " (current-time)))
-         (contact (howdy--find-contact `((:name . ,name)))))
-    (if contact (howdy--contacted-contact contact time)
-      (error (format "No contact %s found!" name)))))
+         (info `((:name . ,name))))
+    (howdy--contacted info time)))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
