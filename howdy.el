@@ -139,6 +139,13 @@ If TIME is nil, `current-time' is used."
        (save-buffer))
      (run-with-idle-timer 1 nil 'org-contacts-db)))
 
+(defun howdy--format-contact (contact &optional format)
+  (format-spec (or format howdy-agenda-entry-format)
+               `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
+                 (?h . ,(car contact))
+                 (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
+                 (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))
+
 (defun howdy-contacted ()
   "Update last contacted time for the contact.
 
@@ -162,15 +169,8 @@ Format is a string matching the following format specification:
   %l - Link to the heading
   %p - Phone number
   %e - Email"
-  (let ()
-    (unless format (setq format howdy-agenda-entry-format))
-    (loop for contact in (howdy--backlog-contacts)
-          collect
-          (format-spec format
-                       `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
-                         (?h . ,(car contact))
-                         (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
-                         (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))))
+  (loop for contact in (howdy--backlog-contacts)
+          collect (howdy--format-contact contact format)))
 
 
 (defun howdy-set-interval (&optional name interval)
