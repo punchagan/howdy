@@ -126,11 +126,11 @@ If TIME is nil, `current-time' is used."
         props)
     (when email
       (setq props `("EMAIL" . ,email)))
-    (org-contacts-filter (concat "^" name "$") nil props)))
+    (car (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defmacro howdy--with-contact (contact &rest body)
   "Eval the BODY with point at the given contact."
-  `(let ((marker (cadar contact)))
+  `(let ((marker (second contact)))
      (with-current-buffer (marker-buffer marker)
        (save-excursion
          (save-restriction
@@ -184,7 +184,7 @@ INTERVAL is the number of days to set as HOWDY_INTERVAL."
     (setq interval
           (read-number (format "%s (days): " howdy-interval-property)
                        howdy-interval-default)))
-  (let ((contact (org-contacts-filter (concat "^" name "$"))))
+  (let ((contact (howdy--find-contact `((:name . ,name)))))
     (if (null contact)
         (error (format "No contact %s found!" name))
       (howdy--with-contact
