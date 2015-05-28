@@ -160,7 +160,7 @@ This function can only be called interactively.  Use
 `howdy--contacted' for doing stuff programmatically."
   (interactive)
   (let* ((name (org-contacts-completing-read "Name: "))
-         (time (org-read-date t t nil "Time: " (current-time)))
+         (time (org-read-date nil t nil nil (current-time)))
          (info `((:name . ,name))))
     (howdy--contacted info time)))
 
