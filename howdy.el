@@ -77,21 +77,18 @@ The following replacements are available:
   :type 'integer
   :group 'howdy)
 
+(defcustom howdy-scheduler 'backlog
+  "The scheduler to use when displaying out-of-touch contacts."
+  :type '(choice
+          (const :tag "Random" random)
+          (const :tag "Backlog" backlog))
+  :group 'howdy)
+
 (defun howdy--backlog-contact-p (contact)
-  (let ((interval
-         (ignore-errors
-           (string-to-number
-            (cdr (assoc-string howdy-interval-property (caddr contact))))))
-        (last-contacted
-         (ignore-errors
-           (org-parse-time-string
-            (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))
-    (when interval
-      (if last-contacted
-          (< interval
-             (time-to-number-of-days
-              (time-since (apply 'encode-time last-contacted))))
-        t))))
+  (let ((backlog (howdy--get-backlog contact)))
+    (if (null backlog)
+        nil
+      (>= backlog 0))))
 
 (defun howdy--backlog-contacts ()
   "Returns a list of contacts who need to be contacted."
@@ -151,6 +148,23 @@ If TIME is nil, `current-time' is used."
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                  (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))
 
+(defun howdy--get-backlog (contact)
+  (let ((interval
+         (ignore-errors
+           (string-to-number
+            (cdr (assoc-string howdy-interval-property (caddr contact))))))
+        (last-contacted
+         (ignore-errors
+           (org-parse-time-string
+            (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))
+    (cond
+     ((null interval) nil)
+     ((null last-contacted) 0)
+     (t
+      (-
+       (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
+       interval)))))
+
 (defun howdy ()
   "Update last contacted time for the contact.
 
@@ -173,12 +187,18 @@ Format is a string matching the following format specification:
   %l - Link to the heading
   %p - Phone number
   %e - Email"
-  (let ((contacts
-         (loop for contact in (shuffle-list (howdy--backlog-contacts))
-               collect (howdy--format-contact contact format))))
-    (if (> (length contacts) howdy-max-contacts)
-        (subseq contacts 0 howdy-max-contacts)
-      contacts)))
+  (let* ((contacts (howdy--backlog-contacts))
+         entries)
+    (cond
+     ((equal howdy-scheduler 'random)
+      (shuffle-list contacts))
+     ((equal howdy-scheduler 'backlog)
+      (sort contacts (lambda (x y) (> (howdy--get-backlog x) (howdy--get-backlog y))))))
+    (setq entries (loop for contact in contacts
+                        collect (howdy--format-contact contact format)))
+    (if (> (length entries) howdy-max-contacts)
+        (subseq entries 0 howdy-max-contacts)
+      entries)))
 
 (defun howdy-set-interval (&optional name interval)
   "Set the HOWDY_INTERVAL for a contact.
