@@ -1,4 +1,4 @@
-;;; howdy.el --- A library to help you keep in touch with people.
+;;; howdy.el --- An Emacs mode to help you keep in touch with people.
 
 ;; Copyright (C) 2015 Puneeth Chaganti
 ;; Author: Puneeth Chaganti <punchagan@muse-amuse.in>
