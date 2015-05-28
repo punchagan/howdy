@@ -1,4 +1,4 @@
-;;; howdy.el --- An Emacs mode to help you keep in touch with people.
+;;; howdy.el --- An Emacs utility to help you keep in touch with people.
 
 ;; Copyright (C) 2015 Puneeth Chaganti
 ;; Author: Puneeth Chaganti <punchagan@muse-amuse.in>
@@ -39,7 +39,7 @@
 ;; example, add an entry like the one below to one of your org-contacts-files.
 ;;
 ;; : * Keep in touch
-;; : %%(howdy-contacts)
+;; : %%(howdy-howdy)
 
 (require 'org-contacts)
 

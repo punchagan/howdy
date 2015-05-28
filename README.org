@@ -1,4 +1,4 @@
-* howdy --- An Emacs mode to help you keep in touch with people.
+* howdy --- An Emacs utility to help you keep in touch with people.
 
 Copyright (C) 2015 Puneeth Chaganti
   - Author: Puneeth Chaganti <punchagan@muse-amuse.in>
@@ -28,6 +28,6 @@ To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
 example, add an entry like the one below to one of your org-contacts-files.
 
 : * Keep in touch
-: %%(howdy-contacts)
+: %%(howdy-howdy)
 
 README.org generated from the library header in ~howdy.el~ by [[https://github.com/punchagan/h2o][h2o]]
