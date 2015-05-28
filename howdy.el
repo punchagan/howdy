@@ -61,11 +61,6 @@
   :type 'string
   :group 'howdy)
 
-(defcustom howdy-contacted-resolution '(0 21600)
-  "The minimum time to elapse for updating last contacted timestamp. "
-  :type '()
-  :group 'howdy)
-
 (defcustom howdy-agenda-entry-format "Say Howdy: %l (%p) (%e)"
   "Format of the \"say howdy!\" agenda entry.
 The following replacements are available:
@@ -117,12 +112,11 @@ If TIME is nil, `current-time' is used."
              (org-parse-time-string
               (cdr (assoc-string howdy-last-contacted-property (org-entry-properties))))))
      (if (or (not old-time)
-             (time-less-p howdy-contacted-resolution
-                          (time-subtract time (apply 'encode-time old-time))))
+             (time-less-p (apply 'encode-time old-time) time))
          (org-set-property
           howdy-last-contacted-property
           (format-time-string
-           (org-time-stamp-format 'long t) time))
+           (org-time-stamp-format nil t) time))
        (message "Not updating with older timestamp.")))))
 
 (defun howdy--find-contact (info)

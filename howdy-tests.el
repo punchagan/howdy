@@ -57,7 +57,7 @@
 (ert-deftest should-set-contacted ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-05-28 Thu 11:38]")
+          (timestamp "[2015-05-28 Thu]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
      (howdy--contacted info time)
@@ -70,8 +70,8 @@
 (ert-deftest should-not-set-older-timestamp ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-05-28 Thu 11:38]")
-          (old-timestamp "[2015-01-01 Thu 11:38]")
+          (timestamp "[2015-05-28 Thu]")
+          (old-timestamp "[2015-01-01 Thu]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (old-time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
@@ -86,8 +86,8 @@
 (ert-deftest should-update-timestamp ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-05-28 Thu 11:38]")
-          (old-timestamp "[2015-01-01 Thu 11:38]")
+          (timestamp "[2015-05-28 Thu]")
+          (old-timestamp "[2015-01-01 Thu]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (old-time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
@@ -102,7 +102,7 @@
 (ert-deftest should-not-update-with-close-timestamp ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-05-28 Thu 11:00]")
+          (timestamp "[2015-05-28 Thu]")
           (new-timestamp "[2015-05-28 Thu 11:10]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (new-time (apply 'encode-time (org-parse-time-string new-timestamp)))
@@ -118,7 +118,7 @@
 (ert-deftest should-show-howdy-pending-contacts ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-01-01 Thu 11:38]")
+          (timestamp "[2015-01-01 Thu]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name)))
           (john-doe (howdy--find-contact info))
