@@ -72,6 +72,11 @@ The following replacements are available:
   :type 'string
   :group 'howdy)
 
+(defcustom howdy-max-contacts 5
+  "Limit for the number of contacts to show in the agenda."
+  :type 'integer
+  :group 'howdy)
+
 (defun howdy--backlog-contact-p (contact)
   (let ((interval
          (ignore-errors
@@ -168,9 +173,12 @@ Format is a string matching the following format specification:
   %l - Link to the heading
   %p - Phone number
   %e - Email"
-  (loop for contact in (howdy--backlog-contacts)
-          collect (howdy--format-contact contact format)))
-
+  (let ((contacts
+         (loop for contact in (shuffle-list (howdy--backlog-contacts))
+               collect (howdy--format-contact contact format))))
+    (if (> (length contacts) howdy-max-contacts)
+        (subseq contacts 0 howdy-max-contacts)
+      contacts)))
 
 (defun howdy-set-interval (&optional name interval)
   "Set the HOWDY_INTERVAL for a contact.
