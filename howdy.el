@@ -121,7 +121,6 @@ If TIME is nil, `current-time' is used."
 
 (defun howdy--find-contact (info)
   "Find the contact using the given info."
-  ;; FIXME: Allow phone/nick/IRC/twitter/etc.
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
         props)
