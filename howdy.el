@@ -193,7 +193,9 @@ Format is a string matching the following format specification:
      ((equal howdy-scheduler 'random)
       (shuffle-list contacts))
      ((equal howdy-scheduler 'backlog)
-      (sort contacts (lambda (x y) (> (howdy--get-backlog x) (howdy--get-backlog y))))))
+      (setq contacts
+            (sort contacts
+                  (lambda (x y) (> (howdy--get-backlog x) (howdy--get-backlog y)))))))
     (setq entries (loop for contact in contacts
                         collect (howdy--format-contact contact format)))
     (if (> (length entries) howdy-max-contacts)
