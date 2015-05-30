@@ -84,6 +84,10 @@ The following replacements are available:
           (const :tag "Backlog" backlog))
   :group 'howdy)
 
+(defvar howdy-add-contact-function nil
+  "Function to call when a contact is not present in the
+  database.")
+
 (defun howdy--backlog-contact-p (contact)
   (let ((backlog (howdy--get-backlog contact)))
     (if (null backlog)
@@ -102,7 +106,10 @@ The following replacements are available:
 If TIME is nil, `current-time' is used."
   (let ((contact (howdy--find-contact info)))
     (unless time (setq time (current-time)))
-    (when contact (howdy--contacted-contact contact time))))
+    (if contact
+        (howdy--contacted-contact contact time)
+      (when howdy-add-contact-function
+        (funcall howdy-add-contact-function info)))))
 
 (defun howdy--contacted-contact (contact time)
   "Update last contacted time for the contact."

@@ -138,3 +138,16 @@
      (howdy--contacted info)
      (should (let* ((org-contacts-last-update nil))
                (null (member msg (howdy-howdy))))))))
+
+(ert-deftest should-prompt-adding-new-contact ()
+  (with-howdy-test-setup
+   (let* ((name "Alice W.")
+          (info `((:name . ,name)))
+          (count 0)
+          (howdy-add-contact-function
+           (lambda (info)
+             (setq count (1+ count))
+             (cdr (assoc :name info))))
+          new-name)
+     (setq new-name (howdy--contacted info))
+     (should (and (equal 1 count) (equal name new-name))))))
