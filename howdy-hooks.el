@@ -22,7 +22,8 @@
 
 (defun howdy-jabber-message-send-hook (body id)
   (let* ((name (jabber-jid-displayname (jabber-jid-user jabber-chatting-with)))
-         (info `((:name . ,name) (:email . ,jabber-chatting-with))))
+         (email (jabber-jid-user jabber-chatting-with))
+         (info `((:name . ,name) (:email . ,email))))
     (howdy--contacted info nil))
   nil)
 
