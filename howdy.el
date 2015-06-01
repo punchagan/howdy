@@ -109,7 +109,7 @@ If TIME is nil, `current-time' is used."
     (if contact
         (howdy--contacted-contact contact time)
       (when howdy-add-contact-function
-        (funcall howdy-add-contact-function info)))))
+        (ignore-errors (funcall howdy-add-contact-function info))))))
 
 (defun howdy--contacted-contact (contact time)
   "Update last contacted time for the contact."
