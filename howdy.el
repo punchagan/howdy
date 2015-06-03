@@ -128,15 +128,6 @@ If TIME is nil, `current-time' is used."
            (org-time-stamp-format nil t) time))
        (message "Not updating with older timestamp.")))))
 
-(defun howdy--find-contact (info)
-  "Find the contact using the given info."
-  (let ((name (cdr (assoc :name info)))
-        (email (cdr (assoc :email info)))
-        props)
-    (when email
-      (setq props `("EMAIL" . ,email)))
-    (car (org-contacts-filter (concat "^" name "$") nil props))))
-
 (defmacro howdy--with-contact (contact &rest body)
   "Eval the BODY with point at the given contact."
   `(let ((marker (second contact)))
@@ -147,6 +138,15 @@ If TIME is nil, `current-time' is used."
            ,@body))
        (save-buffer))
      (run-with-idle-timer 1 nil 'org-contacts-db)))
+
+(defun howdy--find-contact (info)
+  "Find the contact using the given info."
+  (let ((name (cdr (assoc :name info)))
+        (email (cdr (assoc :email info)))
+        props)
+    (when email
+      (setq props `("EMAIL" . ,email)))
+    (car (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
   (format-spec (or format howdy-agenda-entry-format)
@@ -172,18 +172,18 @@ If TIME is nil, `current-time' is used."
        (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
        interval)))))
 
-(defun howdy ()
-  "Update last contacted time for the contact.
-
-If TIME is nil, `current-time' is used.
-
-This function can only be called interactively.  Use
-`howdy--contacted' for doing stuff programmatically."
+(defun howdy-agenda-contacted ()
+  "Mark a contact as contacted from an org-agenda."
   (interactive)
-  (let* ((name (org-contacts-completing-read "Name: "))
-         (time (org-read-date nil t nil nil (current-time)))
-         (info `((:name . ,name))))
-    (howdy--contacted info time)))
+  (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
+         name info contact)
+    (string-match "\\[\\[.*?\\]\\[\\(.*\\)\\]\\]" txt)
+    (setq name (org-no-properties (match-string 1 txt)))
+    (setq info `((:name . ,name)))
+    (setq contact
+          (howdy--find-contact info))
+    (when (string= (howdy--format-contact contact) txt)
+      (howdy--contacted info))))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
@@ -226,6 +226,19 @@ INTERVAL is the number of days to set as HOWDY_INTERVAL."
       (howdy--with-contact
        contact
        (org-set-property howdy-interval-property (number-to-string interval))))))
+
+(defun howdy ()
+  "Update last contacted time for the contact.
+
+If TIME is nil, `current-time' is used.
+
+This function can only be called interactively.  Use
+`howdy--contacted' for doing stuff programmatically."
+  (interactive)
+  (let* ((name (org-contacts-completing-read "Name: "))
+         (time (org-read-date nil t nil nil (current-time)))
+         (info `((:name . ,name))))
+    (howdy--contacted info time)))
 
 (provide 'howdy)
 
