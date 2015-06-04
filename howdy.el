@@ -172,9 +172,9 @@ If TIME is nil, `current-time' is used."
        (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
        interval)))))
 
-(defun howdy-agenda-contacted ()
+(defun howdy-agenda-contacted (arg)
   "Mark a contact as contacted from an org-agenda."
-  (interactive)
+  (interactive "P")
   (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
          name info contact)
     (string-match "\\[\\[.*?\\]\\[\\(.*\\)\\]\\]" txt)
@@ -183,7 +183,9 @@ If TIME is nil, `current-time' is used."
     (setq contact
           (howdy--find-contact info))
     (when (string= (howdy--format-contact contact) txt)
-      (howdy--contacted info))))
+      (if arg
+          (howdy--contacted info (org-read-date nil t nil nil (current-time)))
+        (howdy--contacted info)))))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
