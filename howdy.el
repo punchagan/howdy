@@ -143,10 +143,16 @@ If TIME is nil, `current-time' is used."
   "Find the contact using the given info."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
+	(phone (cdr (assoc :phone info)))
         props)
-    (when email
-      (setq props `("EMAIL" . ,email)))
-    (car (org-contacts-filter (concat "^" name "$") nil props))))
+    (or
+     (when email
+      (setq props `("EMAIL" . ,email))
+      (car (org-contacts-filter (concat "^" name "$") nil props)))
+     (when phone
+      (setq props `("PHONE" . ,phone))
+      (car (org-contacts-filter (concat "^" name "$") nil props)))
+     (car (org-contacts-filter (concat "^" name "$") nil props)))))
 
 (defun howdy--format-contact (contact &optional format)
   (format-spec (or format howdy-agenda-entry-format)
