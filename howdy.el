@@ -88,6 +88,17 @@ The following replacements are available:
   "Function to call when a contact is not present in the
   database.")
 
+(defmacro howdy--with-contact (contact &rest body)
+  "Eval the BODY with point at the given contact."
+  `(let ((marker (second contact)))
+     (with-current-buffer (marker-buffer marker)
+       (save-excursion
+         (save-restriction
+           (goto-char marker)
+           ,@body))
+       (save-buffer))
+     (run-with-idle-timer 1 nil 'org-contacts-db)))
+
 (defun howdy--backlog-contact-p (contact)
   (let ((backlog (howdy--get-backlog contact)))
     (if (null backlog)
@@ -99,6 +110,10 @@ The following replacements are available:
   (loop for contact in (org-contacts-db)
         if (howdy--backlog-contact-p contact)
         collect contact))
+
+(defun howdy--cleanup-phone (phone-number)
+  "Strip off all spaces and dashes from a phone number"
+  (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number))
 
 (defun howdy--contacted (info &optional time)
   "Update last contacted time for the contact.
@@ -128,16 +143,9 @@ If TIME is nil, `current-time' is used."
            (org-time-stamp-format nil t) time))
        (message "Not updating with older timestamp.")))))
 
-(defmacro howdy--with-contact (contact &rest body)
-  "Eval the BODY with point at the given contact."
-  `(let ((marker (second contact)))
-     (with-current-buffer (marker-buffer marker)
-       (save-excursion
-         (save-restriction
-           (goto-char marker)
-           ,@body))
-       (save-buffer))
-     (run-with-idle-timer 1 nil 'org-contacts-db)))
+(defun howdy--endswith (s end)
+  "Check if S ends with END."
+  (org-string-match-p (format "^.*%s$" end) s))
 
 (defun howdy--find-contact (info)
   "Find the contact using the given info."
@@ -151,8 +159,15 @@ If TIME is nil, `current-time' is used."
         (setq props `("EMAIL" . ,email))
         (org-contacts-filter (concat "^" name "$") nil props))
       (when phone
-        (setq props `("PHONE" . ,phone))
-        (org-contacts-filter (concat "^" name "$") nil props))
+        (loop for contact in (org-contacts-db)
+              if (org-find-if (lambda (prop)
+                                (and (howdy--startswith (car prop) org-contacts-tel-property)
+                                     (let ((number (howdy--cleanup-phone (cdr prop)))
+                                           (phone (howdy--cleanup-phone phone)))
+                                       (or (howdy--endswith number phone)
+                                           (howdy--endswith phone number)))))
+                              (caddr contact))
+             collect contact))
       (org-contacts-filter (concat "^" name "$") nil props)))))
 
 (defun howdy--format-contact (contact &optional format)
@@ -178,6 +193,10 @@ If TIME is nil, `current-time' is used."
       (-
        (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
        interval)))))
+
+(defun howdy--startswith (s begin)
+  "Check if S begins with BEGIN."
+  (org-string-match-p (format "^%s.*$" begin) s))
 
 (defun howdy-agenda-contacted (arg)
   "Mark a contact as contacted from an org-agenda."

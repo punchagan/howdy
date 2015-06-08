@@ -6,6 +6,7 @@
 :PROPERTIES:
 :EMAIL: john.doe@example.net
 :PHONE: 999-999-777
+:PHONE_1: 888-999-777
 :END:
 ")
 
@@ -49,6 +50,13 @@
               phone
               (let ((contact (howdy--find-contact `((:phone . ,phone)))))
                 (cdr (assoc-string "PHONE" (caddr contact)))))))))
+
+(ert-deftest should-find-contact-by-other-phone ()
+  (with-howdy-test-setup
+   (let ((phone "+91888999777"))
+     (should (not (null
+                   (let ((contact (howdy--find-contact `((:phone . ,phone)))))
+                     contact)))))))
 
 (ert-deftest should-set-interval ()
   (with-howdy-test-setup
