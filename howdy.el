@@ -145,14 +145,15 @@ If TIME is nil, `current-time' is used."
         (email (cdr (assoc :email info)))
 	(phone (cdr (assoc :phone info)))
         props)
-    (or
-     (when email
-      (setq props `("EMAIL" . ,email))
-      (car (org-contacts-filter (concat "^" name "$") nil props)))
-     (when phone
-      (setq props `("PHONE" . ,phone))
-      (car (org-contacts-filter (concat "^" name "$") nil props)))
-     (car (org-contacts-filter (concat "^" name "$") nil props)))))
+    (car
+     (or
+      (when email
+        (setq props `("EMAIL" . ,email))
+        (org-contacts-filter (concat "^" name "$") nil props))
+      (when phone
+        (setq props `("PHONE" . ,phone))
+        (org-contacts-filter (concat "^" name "$") nil props))
+      (org-contacts-filter (concat "^" name "$") nil props)))))
 
 (defun howdy--format-contact (contact &optional format)
   (format-spec (or format howdy-agenda-entry-format)
