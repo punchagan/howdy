@@ -113,7 +113,9 @@ The following replacements are available:
 
 (defun howdy--cleanup-phone (phone-number)
   "Strip off all spaces and dashes from a phone number"
-  (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number))
+  (replace-regexp-in-string
+   "^0+" ""
+   (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
 
 (defun howdy--contacted (info &optional time)
   "Update last contacted time for the contact.
