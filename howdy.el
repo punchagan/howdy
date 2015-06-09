@@ -141,7 +141,7 @@ If TIME is nil, `current-time' is used."
           howdy-last-contacted-property
           (format-time-string
            (org-time-stamp-format nil t) time))
-       (message "Not updating with older timestamp.")))))
+       (message (format "Not updating %s with older timestamp." (car contact)))))))
 
 (defun howdy--endswith (s end)
   "Check if S ends with END."
