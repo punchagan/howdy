@@ -58,6 +58,13 @@
                    (let ((contact (howdy--find-contact `((:phone . ,phone)))))
                      contact)))))))
 
+(ert-deftest should-not-find-contact-by-wrong-phone ()
+  (with-howdy-test-setup
+   (let ((phone "777"))
+     (should (null
+              (let ((contact (howdy--find-contact `((:phone . ,phone)))))
+                contact))))))
+
 (ert-deftest should-set-interval ()
   (with-howdy-test-setup
    (let ((interval 30)
