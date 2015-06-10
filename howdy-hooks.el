@@ -15,7 +15,7 @@
                (howdy--contacted info nil)))))
 
 (defun howdy-jabber-message-received-hook (from buffer text title)
-  (let ((user (jabber-jid-user from))
+  (let* ((user (jabber-jid-user from))
         (name (jabber-jid-displayname user))
         (info `((:email . ,user) (:name . ,name))))
     (howdy--contacted info)))
