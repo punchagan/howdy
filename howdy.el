@@ -121,10 +121,11 @@ The following replacements are available:
   "Update last contacted time for the contact.
 
 If TIME is nil, `current-time' is used."
-  (let ((contact (howdy--find-contact info)))
+  (let ((contacts (howdy--find-contacts info)))
     (unless time (setq time (current-time)))
-    (if contact
-        (howdy--contacted-contact contact time)
+    (if (> (length contacts) 0)
+        (loop for contact in contacts
+              do (howdy--contacted-contact contact time))
       (when howdy-add-contact-function
         (ignore-errors (funcall howdy-add-contact-function info))))))
 
@@ -149,14 +150,13 @@ If TIME is nil, `current-time' is used."
   "Check if S ends with END."
   (org-string-match-p (format "^.*%s$" end) s))
 
-(defun howdy--find-contact (info)
+(defun howdy--find-contacts (info)
   "Find the contact using the given info."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
 	(phone (cdr (assoc :phone info)))
         props)
-    (car
-     (or
+    (or
       (when email
         (setq props `("EMAIL" . ,email))
         (org-contacts-filter (concat "^" name "$") nil props))
@@ -174,7 +174,7 @@ If TIME is nil, `current-time' is used."
                                                 (howdy--endswith phone number))))))
                               (caddr contact))
              collect contact))
-      (org-contacts-filter (concat "^" name "$") nil props)))))
+      (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
   (format-spec (or format howdy-agenda-entry-format)
@@ -212,8 +212,7 @@ If TIME is nil, `current-time' is used."
     (string-match "\\[\\[.*?\\]\\[\\(.*\\)\\]\\]" txt)
     (setq name (org-no-properties (match-string 1 txt)))
     (setq info `((:name . ,name)))
-    (setq contact
-          (howdy--find-contact info))
+    (setq contact (car (howdy--find-contacts info)))
     (when (string= (howdy--format-contact contact) txt)
       (if arg
           (howdy--contacted info (org-read-date nil t nil nil (current-time)))
@@ -254,7 +253,7 @@ INTERVAL is the number of days to set as HOWDY_INTERVAL."
     (setq interval
           (read-number (format "%s (days): " howdy-interval-property)
                        howdy-interval-default)))
-  (let ((contact (howdy--find-contact `((:name . ,name)))))
+  (let ((contact (car (howdy--find-contacts `((:name . ,name))))))
     (if (null contact)
         (error (format "No contact %s found!" name))
       (howdy--with-contact
