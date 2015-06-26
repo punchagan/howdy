@@ -200,6 +200,13 @@ If TIME is nil, `current-time' is used."
        (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
        interval)))))
 
+(defun howdy--get-contacts-for-tag (tag)
+    "Return all contacts with the given tag."
+    (loop for contact in (org-contacts-db)
+          for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
+          if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
+          collect contact))
+
 (defun howdy--startswith (s begin)
   "Check if S begins with BEGIN."
   (org-string-match-p (format "^%s.*$" begin) s))
