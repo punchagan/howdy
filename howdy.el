@@ -155,6 +155,7 @@ If TIME is nil, `current-time' is used."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
 	(phone (cdr (assoc :phone info)))
+	(tag (cdr (assoc :tag info)))
         props)
     (or
       (when email
@@ -174,6 +175,7 @@ If TIME is nil, `current-time' is used."
                                                 (howdy--endswith phone number))))))
                               (caddr contact))
              collect contact))
+      (when tag (howdy--get-contacts-for-tag tag))
       (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
