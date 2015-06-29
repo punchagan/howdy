@@ -118,6 +118,14 @@ The following replacements are available:
    "^0+" ""
    (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
 
+(defun howdy--contact-tags ()
+  "Get all the tags from the contacts db."
+  (delete-dups
+   (loop for contact in  (org-contacts-db)
+         for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
+         if (not (null tags))
+         append (org-split-string tags ":"))))
+
 (defun howdy--contacted (info &optional time)
   "Update last contacted time for the contact.
 
