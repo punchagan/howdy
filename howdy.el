@@ -118,6 +118,13 @@ The following replacements are available:
    "^0+" ""
    (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
 
+(defun howdy--completing-read-name-or-tag ()
+  (org-completing-read
+   "Name or Tag: "
+   (append
+    (howdy--contact-tags)
+    (mapcar (lambda (x) (org-no-properties (car x))) (org-contacts-filter)))))
+
 (defun howdy--contact-tags ()
   "Get all the tags from the contacts db."
   (delete-dups
@@ -286,9 +293,9 @@ If TIME is nil, `current-time' is used.
 This function can only be called interactively.  Use
 `howdy--contacted' for doing stuff programmatically."
   (interactive)
-  (let* ((name (org-contacts-completing-read "Name: "))
+  (let* ((name-or-tag (howdy--completing-read-name-or-tag))
          (time (org-read-date nil t nil nil (current-time)))
-         (info `((:name . ,name))))
+         (info `((:name . ,name-or-tag) (:tag . ,name-or-tag))))
     (howdy--contacted info time)))
 
 (provide 'howdy)
