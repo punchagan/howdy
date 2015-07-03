@@ -168,8 +168,6 @@
           (count 0)
           (howdy-add-contact-function
            (lambda (info)
-             (setq count (1+ count))
-             (cdr (assoc :name info))))
-          new-name)
-     (setq new-name (howdy--contacted info))
-     (should (and (equal 1 count) (equal name new-name))))))
+             (setq count (1+ count)))))
+     (howdy--contacted info)
+     (should (equal 1 count)))))
