@@ -62,14 +62,15 @@
   :type 'string
   :group 'howdy)
 
-(defcustom howdy-agenda-entry-format "Say Howdy: %l (%p) (%e)"
+(defcustom howdy-agenda-entry-format "Say Howdy: %l (%p) %E"
   "Format of the \"say howdy!\" agenda entry.
 The following replacements are available:
 
   %h - Heading name
   %l - Link to the heading
   %p - Phone number
-  %e - Email"
+  %e - Link to email
+  %E - All emails"
   :type 'string
   :group 'howdy)
 
@@ -201,7 +202,8 @@ If TIME is nil, `current-time' is used."
                `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
                  (?h . ,(car contact))
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
-                 (?e . ,(cdr (assoc-string org-contacts-email-property (caddr contact)))))))
+                 (?e . ,(howdy--get-email-link contact))
+                 (?E . ,(howdy--get-email-links contact)))))
 
 (defun howdy--get-backlog (contact)
   (let ((interval
@@ -226,6 +228,22 @@ If TIME is nil, `current-time' is used."
           for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
           if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
           collect contact))
+
+(defun howdy--get-email-link (contact)
+  (let ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
+    (if (and emails (not (equal emails "")))
+        (let ((email (car (split-string emails " "))))
+          (format "[[mailto:%s][%s]]" email email))
+      "")))
+
+(defun howdy--get-email-links (contact)
+  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
+    (if (and emails (not (equal emails "")))
+        (mapconcat
+         (lambda (email) (format "[[mailto:%s][%s]]" email email))
+         (split-string emails " ")
+         " ")
+      "")))
 
 (defun howdy--startswith (s begin)
   "Check if S begins with BEGIN."
