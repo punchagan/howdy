@@ -254,14 +254,13 @@ If TIME is nil, `current-time' is used."
   (interactive "P")
   (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
          name info contact)
-    (string-match "\\[\\[.*?\\]\\[\\(.*\\)\\]\\]" txt)
+    (string-match "\\[\\[.*?\\]\\[\\(.*?\\)\\]\\]" txt)
     (setq name (org-no-properties (match-string 1 txt)))
     (setq info `((:name . ,name)))
     (setq contact (car (howdy--find-contacts info)))
-    (when (string= (howdy--format-contact contact) txt)
-      (if arg
-          (howdy--contacted info (org-read-date nil t nil nil (current-time)))
-        (howdy--contacted info)))))
+    (if arg
+        (howdy--contacted info (org-read-date nil t nil nil (current-time)))
+      (howdy--contacted info))))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
