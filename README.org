@@ -1,4 +1,6 @@
-* howdy --- An Emacs utility to help you keep in touch with people.
+#+TITLE: howdy
+
+An Emacs utility to help you keep in touch with people.
 
 Copyright (C) 2015 Puneeth Chaganti
   - Author: Puneeth Chaganti <punchagan@muse-amuse.in>
@@ -19,12 +21,12 @@ The library currently only supports using org-contacts to maintain your
 contacts database.
 
 You can configure the frequency at which you wish to contact a person by
-adding a `HOWDY_INTERVAL' property to your contacts.
+adding a ~HOWDY_INTERVAL~ property to your contacts.
 
 You can update information about when you last contacted a person, by using
-the `howdy' function.
+the ~howdy~ function.
 
-To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
+To get agenda entries for out-of-touch contacts, use ~howdy-howdy~. For
 example, add an entry like the one below to one of your org-contacts-files.
 
 : * Keep in touch
