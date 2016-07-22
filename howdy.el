@@ -262,6 +262,15 @@ If TIME is nil, `current-time' is used."
         (howdy--contacted info (org-read-date nil t nil nil (current-time)))
       (howdy--contacted info))))
 
+(defun howdy-clear-backlog (confirm)
+  "Clear all backlog contacts by resetting last howdy to now"
+  (interactive (list (yes-or-no-p "Clear all howdy backlog?")))
+  (let ((contacts (howdy--backlog-contacts))
+        (time (org-read-date nil t nil nil (current-time))))
+    (when confirm
+      (loop for contact in contacts
+            do (howdy--contacted-contact contact time)))))
+
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
 
