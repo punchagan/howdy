@@ -202,9 +202,12 @@ If TIME is nil, `current-time' is used."
 	(tag (cdr (assoc :tag info)))
         props)
     (or
-      (when email
-        (setq props `("EMAIL" . ,email))
-        (org-contacts-filter (concat "^" name "$") nil props))
+     (when email
+       (setq props `(,howdy-jabber-property . ,email))
+       (org-contacts-filter (concat "^" name "$") nil props))
+     (when email
+       (setq props `(,org-contacts-email-property . ,email))
+       (org-contacts-filter (concat "^" name "$") nil props))
       (when phone
         (loop for contact in (org-contacts-db)
               if (org-find-if (lambda (prop)
