@@ -47,8 +47,33 @@
 (defgroup howdy nil
   "Options for howdy.")
 
+(defcustom howdy-email-function #'compose-mail
+  "Function to use for composing email."
+  :type 'function
+  :group 'howdy)
+
 (defcustom howdy-interval-property "HOWDY_INTERVAL"
   "Name of the property for howdy interval."
+  :type 'string
+  :group 'howdy)
+
+(defcustom howdy-jabber-domains nil
+  "List of email domains accepted as jabber ids
+
+If NIL all email ids are accepted as jabber ids. If multiple
+email ids are valid, the ids are prioritized in the order
+specified here."
+
+  :type 'list
+  :group 'howdy)
+
+(defcustom howdy-jabber-function (lambda (jid) (jabber-chat-with (jabber-read-account nil jid) jid))
+  "Function to use for sending a jabber message."
+  :type 'function
+  :group 'howdy)
+
+(defcustom howdy-jabber-property "JABBER"
+  "Name of the property for jabber."
   :type 'string
   :group 'howdy)
 
@@ -245,6 +270,31 @@ If TIME is nil, `current-time' is used."
          " ")
       "")))
 
+(defun howdy--get-email-jid (contact)
+  "Get email id for CONTACT to use as JID."
+  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
+         (ids (org-contacts-split-property (or emails ""))))
+    (if howdy-jabber-domains
+        (car
+         (loop for domain in howdy-jabber-domains
+               for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
+               collect email))
+      (howdy--get-primary-email contact))))
+
+(defun howdy--get-jabber-id (contact)
+  "Get jabber id for the CONTACT.
+
+If `howdy-jabber-property' is not set, use a valid email-id based
+on `howdy-jabber-domains'."
+  (let ((jid (cdr (assoc-string "JABBER" (caddr contact)))))
+    (or jid (howdy--get-email-jid contact))))
+
+(defun howdy--get-primary-email (contact)
+  "Get primary email id for CONTACT."
+  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
+         (ids (org-contacts-split-property (or emails ""))))
+    (car ids)))
+
 (defun howdy--startswith (s begin)
   "Check if S begins with BEGIN."
   (org-string-match-p (format "^%s.*$" begin) s))
@@ -270,6 +320,22 @@ If TIME is nil, `current-time' is used."
     (when confirm
       (loop for contact in contacts
             do (howdy--contacted-contact contact time)))))
+
+(defun howdy-create-tag-buffer (tag)
+  "Create buffer to contact people with specified TAG."
+  (interactive (list (org-completing-read "Tag: " (howdy--contact-tags))))
+  (switch-to-buffer (format "*howdy-%s*" tag))
+  (delete-region (point-min) (point-max))
+  (org-mode)
+  (loop for contact in (howdy--get-contacts-for-tag tag)
+        for name = (car contact)
+        for jid = (howdy--get-jabber-id contact)
+        for email = (howdy--get-primary-email contact)
+        do (insert (format "- [ ] %s " name))
+        do (org-insert-link nil (format "elisp:(funcall howdy-email-function \"%s\")" email) "Email")
+        do (insert " ")
+        do (org-insert-link nil (format "elisp:(funcall howdy-jabber-function \"%s\")" jid) "Chat")
+        do (insert "\n")))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
