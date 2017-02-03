@@ -87,7 +87,7 @@ specified here."
   :type 'string
   :group 'howdy)
 
-(defcustom howdy-agenda-entry-format "Say Howdy: %l (%p) %E"
+(defcustom howdy-agenda-entry-format "Say Howdy%b: %l (%p) %E"
   "Format of the \"say howdy!\" agenda entry.
 The following replacements are available:
 
@@ -126,17 +126,26 @@ The following replacements are available:
        (save-buffer))
      (run-with-idle-timer 1 nil 'org-contacts-db)))
 
-(defun howdy--backlog-contact-p (contact)
-  (let ((backlog (howdy--get-backlog contact)))
+(defun howdy--backlog-contact-p (contact &optional at-time)
+  (let ((backlog (howdy--get-backlog contact at-time)))
     (if (null backlog)
         nil
-      (>= backlog 0))))
+      (and (>= backlog 0) backlog))))
 
-(defun howdy--backlog-contacts ()
+(defun howdy--backlog-contacts (&optional at-time)
   "Returns a list of contacts who need to be contacted."
   (loop for contact in (org-contacts-db)
-        if (howdy--backlog-contact-p contact)
+        do (let ((backlog (howdy--backlog-contact-p contact at-time)))
+             (push `("BACKLOG" . ,backlog) (caddr contact)))
+        if (cdr (assoc "BACKLOG" (caddr contact)))
         collect contact))
+
+(defun howdy--backlog-format-str (contact)
+  "Return the format string for showing current backlog"
+  (let ((backlog (round (or (cdr (assoc "BACKLOG" (caddr contact))) 0))))
+    (if (> backlog 0)
+        (format " [%sx]" backlog)
+      "")))
 
 (defun howdy--cleanup-phone (phone-number)
   "Strip off all spaces and dashes from a phone number"
@@ -229,11 +238,12 @@ If TIME is nil, `current-time' is used."
   (format-spec (or format howdy-agenda-entry-format)
                `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
                  (?h . ,(car contact))
+                 (?b . ,(howdy--backlog-format-str contact))
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                  (?e . ,(howdy--get-email-link contact))
                  (?E . ,(howdy--get-email-links contact)))))
 
-(defun howdy--get-backlog (contact)
+(defun howdy--get-backlog (contact &optional at-time)
   (let ((interval
          (ignore-errors
            (string-to-number
@@ -247,7 +257,7 @@ If TIME is nil, `current-time' is used."
      ((null last-contacted) 0)
      (t
       (-
-       (time-to-number-of-days (time-since (apply 'encode-time last-contacted)))
+       (time-to-number-of-days (time-subtract at-time (apply 'encode-time last-contacted)))
        interval)))))
 
 (defun howdy--get-contacts-for-tag (tag)
@@ -256,6 +266,17 @@ If TIME is nil, `current-time' is used."
           for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
           if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
           collect contact))
+
+(defun howdy--get-email-jid (contact)
+  "Get email id for CONTACT to use as JID."
+  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
+         (ids (org-contacts-split-property (or emails ""))))
+    (if howdy-jabber-domains
+        (car
+         (loop for domain in howdy-jabber-domains
+               for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
+               collect email))
+      (howdy--get-primary-email contact))))
 
 (defun howdy--get-email-link (contact)
   (let ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
@@ -273,17 +294,6 @@ If TIME is nil, `current-time' is used."
          " ")
       "")))
 
-(defun howdy--get-email-jid (contact)
-  "Get email id for CONTACT to use as JID."
-  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
-         (ids (org-contacts-split-property (or emails ""))))
-    (if howdy-jabber-domains
-        (car
-         (loop for domain in howdy-jabber-domains
-               for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
-               collect email))
-      (howdy--get-primary-email contact))))
-
 (defun howdy--get-jabber-id (contact)
   "Get jabber id for the CONTACT.
 
@@ -297,6 +307,18 @@ on `howdy-jabber-domains'."
   (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
          (ids (org-contacts-split-property (or emails ""))))
     (car ids)))
+
+(defun howdy--sorted-backlog-contacts (contacts date)
+  (unless (equal date (calendar-current-date))
+    ;; filter out contacts not turning backlog on given date
+    (setq contacts
+          (loop for contact in contacts
+                if (< (cdr (assoc "BACKLOG" (caddr contact))) 1)
+                collect contact)))
+  (sort contacts
+        (lambda (x y)
+          (> (cdr (assoc "BACKLOG" (caddr x)))
+             (cdr (assoc "BACKLOG" (caddr y)))))))
 
 (defun howdy--startswith (s begin)
   "Check if S begins with BEGIN."
@@ -349,15 +371,16 @@ Format is a string matching the following format specification:
   %l - Link to the heading
   %p - Phone number
   %e - Email"
-  (let* ((contacts (howdy--backlog-contacts))
+  (let* ((date (or (bound-and-true-p date) (calendar-current-date)))
+         (at-time (calendar-time-from-absolute
+                   (calendar-absolute-from-gregorian date) 0))
+         (contacts (howdy--backlog-contacts at-time))
          entries)
     (cond
      ((equal howdy-scheduler 'random)
       (shuffle-list contacts))
      ((equal howdy-scheduler 'backlog)
-      (setq contacts
-            (sort contacts
-                  (lambda (x y) (> (howdy--get-backlog x) (howdy--get-backlog y)))))))
+      (setq contacts (howdy--sorted-backlog-contacts contacts date))))
     (setq entries (loop for contact in contacts
                         collect (howdy--format-contact contact format)))
     (if (> (length entries) howdy-max-contacts)
