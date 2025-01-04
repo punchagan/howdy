@@ -372,8 +372,8 @@ Format is a string matching the following format specification:
   %p - Phone number
   %e - Email"
   (let* ((date (or (bound-and-true-p date) (calendar-current-date)))
-         (at-time (calendar-time-from-absolute
-                   (calendar-absolute-from-gregorian date) 0))
+         (at-time (org-time-from-absolute
+                   (calendar-absolute-from-gregorian date)))
          (contacts (howdy--backlog-contacts at-time))
          entries)
     (cond
