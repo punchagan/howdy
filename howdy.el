@@ -217,22 +217,22 @@ If TIME is nil, `current-time' is used."
      (when email
        (setq props `(,org-contacts-email-property . ,email))
        (org-contacts-filter (concat "^" name "$") nil props))
-      (when phone
-        (loop for contact in (org-contacts-db)
-              if (org-find-if (lambda (prop)
-                                (and (howdy--startswith (car prop) org-contacts-tel-property)
-                                     (let* ((number (howdy--cleanup-phone (cdr prop)))
-                                            (n (length number))
-                                            (phone (howdy--cleanup-phone phone))
-                                            (p (length phone)))
-                                       (and (>= n 7)
-                                            (>= p 7)
-                                            (or (howdy--endswith number phone)
-                                                (howdy--endswith phone number))))))
-                              (caddr contact))
+     (when phone
+       (loop for contact in (org-contacts-db)
+             if (org-find-if (lambda (prop)
+                               (and (howdy--startswith (car prop) org-contacts-tel-property)
+                                    (let* ((number (howdy--cleanup-phone (cdr prop)))
+                                           (n (length number))
+                                           (phone (howdy--cleanup-phone phone))
+                                           (p (length phone)))
+                                      (and (>= n 7)
+                                           (>= p 7)
+                                           (or (howdy--endswith number phone)
+                                               (howdy--endswith phone number))))))
+                             (caddr contact))
              collect contact))
-      (when tag (howdy--get-contacts-for-tag tag))
-      (org-contacts-filter (concat "^" name "$") nil props))))
+     (when tag (howdy--get-contacts-for-tag tag))
+     (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
   (format-spec (or format howdy-agenda-entry-format)
@@ -261,11 +261,11 @@ If TIME is nil, `current-time' is used."
        interval)))))
 
 (defun howdy--get-contacts-for-tag (tag)
-    "Return all contacts with the given tag."
-    (loop for contact in (org-contacts-db)
-          for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
-          if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
-          collect contact))
+  "Return all contacts with the given tag."
+  (loop for contact in (org-contacts-db)
+        for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
+        if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
+        collect contact))
 
 (defun howdy--get-email-jid (contact)
   "Get email id for CONTACT to use as JID."
