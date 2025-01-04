@@ -41,7 +41,6 @@
 ;; : * Keep in touch
 ;; : %%(howdy-howdy)
 
-(require 'cl)
 (require 'org-contacts)
 
 (defgroup howdy nil
@@ -134,11 +133,11 @@ The following replacements are available:
 
 (defun howdy--backlog-contacts (&optional at-time)
   "Returns a list of contacts who need to be contacted."
-  (loop for contact in (org-contacts-db)
-        do (let ((backlog (howdy--backlog-contact-p contact at-time)))
-             (push `("BACKLOG" . ,backlog) (caddr contact)))
-        if (cdr (assoc "BACKLOG" (caddr contact)))
-        collect contact))
+  (cl-loop for contact in (org-contacts-db)
+           do (let ((backlog (howdy--backlog-contact-p contact at-time)))
+                (push `("BACKLOG" . ,backlog) (caddr contact)))
+           if (cdr (assoc "BACKLOG" (caddr contact)))
+           collect contact))
 
 (defun howdy--backlog-format-str (contact)
   "Return the format string for showing current backlog"
@@ -163,10 +162,10 @@ The following replacements are available:
 (defun howdy--contact-tags ()
   "Get all the tags from the contacts db."
   (delete-dups
-   (loop for contact in  (org-contacts-db)
-         for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
-         if (not (null tags))
-         append (org-split-string tags ":"))))
+   (cl-loop for contact in  (org-contacts-db)
+            for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
+            if (not (null tags))
+            append (org-split-string tags ":"))))
 
 (defun howdy--contacted (info &optional time)
   "Update last contacted time for the contact.
@@ -175,12 +174,12 @@ If TIME is nil, `current-time' is used."
   (let ((contacts (howdy--find-contacts info)))
     (unless time (setq time (current-time)))
     (if (> (length contacts) 0)
-        (loop for contact in contacts
-              do (howdy--contacted-contact contact time))
+        (cl-loop for contact in contacts
+                 do (howdy--contacted-contact contact time))
       (when howdy-add-contact-function
         (ignore-errors (funcall howdy-add-contact-function info))
-        (loop for contact in (howdy--find-contacts info)
-              do (howdy--contacted-contact contact time))))))
+        (cl-loop for contact in (howdy--find-contacts info)
+                 do (howdy--contacted-contact contact time))))))
 
 (defun howdy--contacted-contact (contact time)
   "Update last contacted time for the contact."
@@ -218,19 +217,19 @@ If TIME is nil, `current-time' is used."
        (setq props `(,org-contacts-email-property . ,email))
        (org-contacts-filter (concat "^" name "$") nil props))
      (when phone
-       (loop for contact in (org-contacts-db)
-             if (org-find-if (lambda (prop)
-                               (and (howdy--startswith (car prop) org-contacts-tel-property)
-                                    (let* ((number (howdy--cleanup-phone (cdr prop)))
-                                           (n (length number))
-                                           (phone (howdy--cleanup-phone phone))
-                                           (p (length phone)))
-                                      (and (>= n 7)
-                                           (>= p 7)
-                                           (or (howdy--endswith number phone)
-                                               (howdy--endswith phone number))))))
-                             (caddr contact))
-             collect contact))
+       (cl-loop for contact in (org-contacts-db)
+                if (org-find-if (lambda (prop)
+                                  (and (howdy--startswith (car prop) org-contacts-tel-property)
+                                       (let* ((number (howdy--cleanup-phone (cdr prop)))
+                                              (n (length number))
+                                              (phone (howdy--cleanup-phone phone))
+                                              (p (length phone)))
+                                         (and (>= n 7)
+                                              (>= p 7)
+                                              (or (howdy--endswith number phone)
+                                                  (howdy--endswith phone number))))))
+                                (caddr contact))
+                collect contact))
      (when tag (howdy--get-contacts-for-tag tag))
      (org-contacts-filter (concat "^" name "$") nil props))))
 
@@ -262,10 +261,10 @@ If TIME is nil, `current-time' is used."
 
 (defun howdy--get-contacts-for-tag (tag)
   "Return all contacts with the given tag."
-  (loop for contact in (org-contacts-db)
-        for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
-        if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
-        collect contact))
+  (cl-loop for contact in (org-contacts-db)
+           for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
+           if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
+           collect contact))
 
 (defun howdy--get-email-jid (contact)
   "Get email id for CONTACT to use as JID."
@@ -273,9 +272,9 @@ If TIME is nil, `current-time' is used."
          (ids (org-contacts-split-property (or emails ""))))
     (if howdy-jabber-domains
         (car
-         (loop for domain in howdy-jabber-domains
-               for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
-               collect email))
+         (cl-loop for domain in howdy-jabber-domains
+                  for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
+                  collect email))
       (howdy--get-primary-email contact))))
 
 (defun howdy--get-email-link (contact)
@@ -312,9 +311,9 @@ on `howdy-jabber-domains'."
   (unless (equal date (calendar-current-date))
     ;; filter out contacts not turning backlog on given date
     (setq contacts
-          (loop for contact in contacts
-                if (< (cdr (assoc "BACKLOG" (caddr contact))) 1)
-                collect contact)))
+          (cl-loop for contact in contacts
+                   if (< (cdr (assoc "BACKLOG" (caddr contact))) 1)
+                   collect contact)))
   (sort contacts
         (lambda (x y)
           (> (cdr (assoc "BACKLOG" (caddr x)))
@@ -343,8 +342,8 @@ on `howdy-jabber-domains'."
   (let ((contacts (howdy--backlog-contacts))
         (time (org-read-date nil t nil nil (current-time))))
     (when confirm
-      (loop for contact in contacts
-            do (howdy--contacted-contact contact time)))))
+      (cl-loop for contact in contacts
+               do (howdy--contacted-contact contact time)))))
 
 (defun howdy-create-tag-buffer (tag)
   "Create buffer to contact people with specified TAG."
@@ -352,15 +351,15 @@ on `howdy-jabber-domains'."
   (switch-to-buffer (format "*howdy-%s*" tag))
   (delete-region (point-min) (point-max))
   (org-mode)
-  (loop for contact in (howdy--get-contacts-for-tag tag)
-        for name = (car contact)
-        for jid = (howdy--get-jabber-id contact)
-        for email = (howdy--get-primary-email contact)
-        do (insert (format "- [ ] %s " name))
-        do (org-insert-link nil (format "elisp:(funcall howdy-email-function \"%s\")" email) "Email")
-        do (insert " ")
-        do (org-insert-link nil (format "elisp:(funcall howdy-jabber-function \"%s\")" jid) "Chat")
-        do (insert "\n")))
+  (cl-loop for contact in (howdy--get-contacts-for-tag tag)
+           for name = (car contact)
+           for jid = (howdy--get-jabber-id contact)
+           for email = (howdy--get-primary-email contact)
+           do (insert (format "- [ ] %s " name))
+           do (org-insert-link nil (format "elisp:(funcall howdy-email-function \"%s\")" email) "Email")
+           do (insert " ")
+           do (org-insert-link nil (format "elisp:(funcall howdy-jabber-function \"%s\")" jid) "Chat")
+           do (insert "\n")))
 
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
@@ -381,10 +380,10 @@ Format is a string matching the following format specification:
       (shuffle-list contacts))
      ((equal howdy-scheduler 'backlog)
       (setq contacts (howdy--sorted-backlog-contacts contacts date))))
-    (setq entries (loop for contact in contacts
-                        collect (howdy--format-contact contact format)))
+    (setq entries (cl-loop for contact in contacts
+                           collect (howdy--format-contact contact format)))
     (if (> (length entries) howdy-max-contacts)
-        (subseq entries 0 howdy-max-contacts)
+        (cl-subseq entries 0 howdy-max-contacts)
       entries)))
 
 (defun howdy-set-interval (&optional name interval)
