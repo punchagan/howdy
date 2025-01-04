@@ -241,7 +241,7 @@ If TIME is nil, `current-time' is used."
                  (?b . ,(howdy--backlog-format-str contact))
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                  (?e . ,(howdy--get-email-link contact))
-                 (?E . ,(howdy--get-email-links contact)))))
+                 (?E . ,(howdy--get-email-links contact))) 'ignore-missing))
 
 (defun howdy--get-backlog (contact &optional at-time)
   (let ((interval
