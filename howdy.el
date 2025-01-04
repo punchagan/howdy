@@ -57,7 +57,7 @@
   :group 'howdy)
 
 (defcustom howdy-jabber-domains nil
-  "List of email domains accepted as jabber ids
+  "List of email domains accepted as jabber ids.
 
 If NIL all email ids are accepted as jabber ids. If multiple
 email ids are valid, the ids are prioritized in the order
@@ -111,11 +111,10 @@ The following replacements are available:
   :group 'howdy)
 
 (defvar howdy-add-contact-function nil
-  "Function to call when a contact is not present in the
-  database.")
+  "Function to call when a contact is not present in the database.")
 
 (defmacro howdy--with-contact (contact &rest body)
-  "Eval the BODY with point at the given contact."
+  "Eval the BODY with point at the given CONTACT."
   `(let ((marker (second contact)))
      (with-current-buffer (marker-buffer marker)
        (save-excursion
@@ -132,7 +131,7 @@ The following replacements are available:
       (and (>= backlog 0) backlog))))
 
 (defun howdy--backlog-contacts (&optional at-time)
-  "Returns a list of contacts who need to be contacted."
+  "Return a list of contacts who need to be contacted AT-TIME."
   (cl-loop for contact in (org-contacts-db)
            do (let ((backlog (howdy--backlog-contact-p contact at-time)))
                 (push `("BACKLOG" . ,backlog) (caddr contact)))
@@ -140,14 +139,14 @@ The following replacements are available:
            collect contact))
 
 (defun howdy--backlog-format-str (contact)
-  "Return the format string for showing current backlog"
+  "Return the format string for displaying a CONTACT."
   (let ((backlog (round (or (cdr (assoc "BACKLOG" (caddr contact))) 0))))
     (if (> backlog 0)
         (format " [%sx]" backlog)
       "")))
 
 (defun howdy--cleanup-phone (phone-number)
-  "Strip off all spaces and dashes from a phone number"
+  "Strip off all spaces and dashes from a PHONE-NUMBER."
   (replace-regexp-in-string
    "^0+" ""
    (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
@@ -168,7 +167,7 @@ The following replacements are available:
             append (org-split-string tags ":"))))
 
 (defun howdy--contacted (info &optional time)
-  "Update last contacted time for the contact.
+  "Update last contacted TIME for a contact based on INFO.
 
 If TIME is nil, `current-time' is used."
   (let ((contacts (howdy--find-contacts info)))
@@ -182,7 +181,7 @@ If TIME is nil, `current-time' is used."
                  do (howdy--contacted-contact contact time))))))
 
 (defun howdy--contacted-contact (contact time)
-  "Update last contacted time for the contact."
+  "Update last contacted TIME for CONTACT."
   (howdy--with-contact
    contact
    (let (old-time)
@@ -203,7 +202,7 @@ If TIME is nil, `current-time' is used."
   (org-string-match-p (format "^.*%s$" end) s))
 
 (defun howdy--find-contacts (info)
-  "Find the contact using the given info."
+  "Find contact using the given INFO."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
 	(phone (cdr (assoc :phone info)))
@@ -260,7 +259,7 @@ If TIME is nil, `current-time' is used."
        interval)))))
 
 (defun howdy--get-contacts-for-tag (tag)
-  "Return all contacts with the given tag."
+  "Return all contacts with the given TAG."
   (cl-loop for contact in (org-contacts-db)
            for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
            if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
@@ -324,7 +323,10 @@ on `howdy-jabber-domains'."
   (org-string-match-p (format "^%s.*$" begin) s))
 
 (defun howdy-agenda-contacted (arg)
-  "Mark a contact as contacted from an org-agenda."
+  "Mark a contact as contacted from a org agenda buffer.
+
+If ARG is provided to the function, the user is prompted for the
+time to use as the last contacted date."
   (interactive "P")
   (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
          name info contact)
@@ -337,7 +339,9 @@ on `howdy-jabber-domains'."
       (howdy--contacted info))))
 
 (defun howdy-clear-backlog (confirm)
-  "Clear all backlog contacts by resetting last howdy to now"
+  "Clear all backlog contacts by resetting last howdy to now.
+
+If CONFIRM is non-nil, the user is prompted before proceeding."
   (interactive (list (yes-or-no-p "Clear all howdy backlog?")))
   (let ((contacts (howdy--backlog-contacts))
         (time (org-read-date nil t nil nil (current-time))))
@@ -367,9 +371,9 @@ on `howdy-jabber-domains'."
         (lambda (x y) (> (random t) (random t)))))
 
 (defun howdy-howdy (&optional format)
-  "Returns agenda entries for out-of-touch contacts.
+  "Return agenda entries for out-of-touch contacts.
 
-Format is a string matching the following format specification:
+FORMAT is a string matching the following format specification:
 
   %h - Heading name
   %l - Link to the heading
@@ -392,9 +396,11 @@ Format is a string matching the following format specification:
       entries)))
 
 (defun howdy-set-interval (&optional name interval)
-  "Set the HOWDY_INTERVAL for a contact.
+  "Set the howdy INTERVAL for a contact.
 
-INTERVAL is the number of days to set as HOWDY_INTERVAL."
+INTERVAL is the number of days to set as HOWDY_INTERVAL.
+
+If NAME is not provided, the user is prompted interactively."
   (interactive)
   (unless name
     (setq name (org-contacts-completing-read "Name: ")))
