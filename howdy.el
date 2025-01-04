@@ -361,6 +361,11 @@ on `howdy-jabber-domains'."
            do (org-insert-link nil (format "elisp:(funcall howdy-jabber-function \"%s\")" jid) "Chat")
            do (insert "\n")))
 
+(defun howdy--shuffle-contacts (contacts)
+  "Shuffle a list of CONTACTS randomly."
+  (sort contacts
+        (lambda (x y) (> (random t) (random t)))))
+
 (defun howdy-howdy (&optional format)
   "Returns agenda entries for out-of-touch contacts.
 
@@ -377,7 +382,7 @@ Format is a string matching the following format specification:
          entries)
     (cond
      ((equal howdy-scheduler 'random)
-      (shuffle-list contacts))
+      (howdy--shuffle-contacts contacts))
      ((equal howdy-scheduler 'backlog)
       (setq contacts (howdy--sorted-backlog-contacts contacts date))))
     (setq entries (cl-loop for contact in contacts
