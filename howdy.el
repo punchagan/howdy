@@ -308,13 +308,8 @@ on `howdy-jabber-domains'."
          (ids (org-contacts-split-property (or emails ""))))
     (car ids)))
 
-(defun howdy--sorted-backlog-contacts (contacts date)
-  (unless (equal date (calendar-current-date))
-    ;; filter out contacts not turning backlog on given date
-    (setq contacts
-          (cl-loop for contact in contacts
-                   if (< (cdr (assoc "BACKLOG" (caddr contact))) 1)
-                   collect contact)))
+(defun howdy--sorted-backlog-contacts (contacts)
+  "Sort CONTACTS based on the backlog duration."
   (sort contacts
         (lambda (x y)
           (> (cdr (assoc "BACKLOG" (caddr x)))
@@ -381,7 +376,8 @@ FORMAT is a string matching the following format specification:
   %l - Link to the heading
   %p - Phone number
   %e - Email"
-  (let* ((date (or (bound-and-true-p date) (calendar-current-date)))
+  (let* ((date (or (bound-and-true-p org-agenda-current-date)
+                   (calendar-current-date)))
          (at-time (org-time-from-absolute
                    (calendar-absolute-from-gregorian date)))
          (contacts (howdy--backlog-contacts at-time))
@@ -390,7 +386,7 @@ FORMAT is a string matching the following format specification:
      ((equal howdy-scheduler 'random)
       (howdy--shuffle-contacts contacts))
      ((equal howdy-scheduler 'backlog)
-      (setq contacts (howdy--sorted-backlog-contacts contacts date))))
+      (setq contacts (howdy--sorted-backlog-contacts contacts))))
     (setq entries (cl-loop for contact in contacts
                            collect (howdy--format-contact contact format)))
     (if (> (length entries) howdy-max-contacts)
