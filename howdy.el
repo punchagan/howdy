@@ -210,8 +210,8 @@ If TIME is nil, `current-time' is used."
   "Find contact using the given INFO."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
-	(phone (cdr (assoc :phone info)))
-	(tag (cdr (assoc :tag info)))
+        (phone (cdr (assoc :phone info)))
+        (tag (cdr (assoc :tag info)))
         props)
     (or
      (when email
