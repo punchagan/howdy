@@ -46,7 +46,8 @@
 (require 'org-contacts)
 
 (defgroup howdy nil
-  "Options for howdy.")
+  "Options for howdy."
+  :group 'howdy)
 
 (defcustom howdy-email-function #'compose-mail
   "Function to use for composing email."
