@@ -41,6 +41,8 @@
 ;; : * Keep in touch
 ;; : %%(howdy-howdy)
 
+;;; Code:
+
 (require 'org-contacts)
 
 (defgroup howdy nil
