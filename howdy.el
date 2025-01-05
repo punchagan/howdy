@@ -128,6 +128,7 @@ The following replacements are available:
      (run-with-idle-timer 1 nil 'org-contacts-db)))
 
 (defun howdy--backlog-contact-p (contact &optional at-time)
+  "Check whether CONTACT is a backlog contact at AT-TIME."
   (let ((backlog (howdy--get-backlog contact at-time)))
     (if (null backlog)
         nil
@@ -155,6 +156,7 @@ The following replacements are available:
    (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
 
 (defun howdy--completing-read-name-or-tag ()
+  "Prompt the user for a name or tag to search for."
   (org-completing-read
    "Name or Tag: "
    (append
@@ -236,6 +238,7 @@ If TIME is nil, `current-time' is used."
      (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
+  "Format a CONTACT based on FORMAT."
   (format-spec (or format howdy-agenda-entry-format)
                `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
                  (?h . ,(car contact))
@@ -245,6 +248,7 @@ If TIME is nil, `current-time' is used."
                  (?E . ,(howdy--get-email-links contact))) 'ignore-missing))
 
 (defun howdy--get-backlog (contact &optional at-time)
+  "Get the backlog value for a CONTACT at AT-TIME."
   (let ((interval
          (ignore-errors
            (string-to-number
@@ -280,6 +284,7 @@ If TIME is nil, `current-time' is used."
       (howdy--get-primary-email contact))))
 
 (defun howdy--get-email-link (contact)
+  "Get email link for CONTACT."
   (let ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
     (if (and emails (not (equal emails "")))
         (let ((email (car (split-string emails " "))))
@@ -287,6 +292,7 @@ If TIME is nil, `current-time' is used."
       "")))
 
 (defun howdy--get-email-links (contact)
+  "Get email links for CONTACT."
   (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
     (if (and emails (not (equal emails "")))
         (mapconcat
