@@ -44,6 +44,7 @@
 ;;; Code:
 
 (require 'org-contacts)
+(require 'howdy-jabber)
 
 (defgroup howdy nil
   "Options for howdy."
@@ -56,26 +57,6 @@
 
 (defcustom howdy-interval-property "HOWDY_INTERVAL"
   "Name of the property for howdy interval."
-  :type 'string
-  :group 'howdy)
-
-(defcustom howdy-jabber-domains nil
-  "List of email domains accepted as jabber ids.
-
-If NIL all email ids are accepted as jabber ids. If multiple
-email ids are valid, the ids are prioritized in the order
-specified here."
-
-  :type 'list
-  :group 'howdy)
-
-(defcustom howdy-jabber-function (lambda (jid) (jabber-chat-with (jabber-read-account nil jid) jid))
-  "Function to use for sending a jabber message."
-  :type 'function
-  :group 'howdy)
-
-(defcustom howdy-jabber-property "JABBER"
-  "Name of the property for jabber."
   :type 'string
   :group 'howdy)
 
@@ -271,17 +252,6 @@ If TIME is nil, `current-time' is used."
            if (save-match-data (string-match (format ":%s:" tag) (or tags "")))
            collect contact))
 
-(defun howdy--get-email-jid (contact)
-  "Get email id for CONTACT to use as JID."
-  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
-         (ids (org-contacts-split-property (or emails ""))))
-    (if howdy-jabber-domains
-        (car
-         (cl-loop for domain in howdy-jabber-domains
-                  for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
-                  collect email))
-      (howdy--get-primary-email contact))))
-
 (defun howdy--get-email-link (contact)
   "Get email link for CONTACT."
   (let ((emails (cdr (assoc-string org-contacts-email-property (caddr contact)))))
@@ -299,20 +269,6 @@ If TIME is nil, `current-time' is used."
          (split-string emails " ")
          " ")
       "")))
-
-(defun howdy--get-jabber-id (contact)
-  "Get jabber id for the CONTACT.
-
-If `howdy-jabber-property' is not set, use a valid email-id based
-on `howdy-jabber-domains'."
-  (let ((jid (cdr (assoc-string "JABBER" (caddr contact)))))
-    (or jid (howdy--get-email-jid contact))))
-
-(defun howdy--get-primary-email (contact)
-  "Get primary email id for CONTACT."
-  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
-         (ids (org-contacts-split-property (or emails ""))))
-    (car ids)))
 
 (defun howdy--sorted-backlog-contacts (contacts)
   "Sort CONTACTS based on the backlog duration."
@@ -360,8 +316,8 @@ If CONFIRM is non-nil, the user is prompted before proceeding."
   (org-mode)
   (cl-loop for contact in (howdy--get-contacts-for-tag tag)
            for name = (car contact)
-           for jid = (howdy--get-jabber-id contact)
-           for email = (howdy--get-primary-email contact)
+           for jid = (howdy-jabber-get-jabber-id contact)
+           for email = (howdy-jabber-get-primary-email contact)
            do (insert (format "- [ ] %s " name))
            do (org-insert-link nil (format "elisp:(funcall howdy-email-function \"%s\")" email) "Email")
            do (insert " ")

@@ -14,19 +14,6 @@
           do (let ((info `((:email . ,email))))
                (howdy-contacted info nil)))))
 
-(defun howdy-jabber-message-received-hook (from buffer text title)
-  (let* ((user (jabber-jid-user from))
-         (name (jabber-jid-displayname user))
-         (info `((:email . ,user) (:name . ,name))))
-    (howdy-contacted info)))
-
-(defun howdy-jabber-message-send-hook (body id)
-  (let* ((name (jabber-jid-displayname (jabber-jid-user jabber-chatting-with)))
-         (email (jabber-jid-user jabber-chatting-with))
-         (info `((:name . ,name) (:email . ,email))))
-    (howdy-contacted info nil))
-  nil)
-
 (defun howdy-mu4e-message-receive-hook ()
   (let* ((msg (mu4e-message-at-point 'noerror))
          (from (car (mu4e-message-field msg :from)))
