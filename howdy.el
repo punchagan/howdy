@@ -177,13 +177,10 @@ The following replacements are available:
 If TIME is nil, `current-time' is used."
   (let ((contacts (howdy--find-contacts info)))
     (unless time (setq time (current-time)))
-    (if (> (length contacts) 0)
-        (cl-loop for contact in contacts
-                 do (howdy--contacted-contact contact time))
-      (when howdy-add-contact-function
-        (ignore-errors (funcall howdy-add-contact-function info))
-        (cl-loop for contact in (howdy--find-contacts info)
-                 do (howdy--contacted-contact contact time))))))
+    (when (and (= (length contacts) 0) howdy-add-contact-function)
+      (ignore-errors (funcall howdy-add-contact-function info)))
+    (cl-loop for contact in (howdy--find-contacts info)
+             do (howdy--contacted-contact contact time))))
 
 (defun howdy--contacted-contact (contact time)
   "Update last contacted TIME for CONTACT."
