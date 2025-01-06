@@ -18,7 +18,9 @@
        (insert howdy-tests-contacts-data)
        (write-file org-contacts-file))
      (unwind-protect ,@body
-       (kill-buffer (find-buffer-visiting org-contacts-file)))))
+       (kill-buffer (find-buffer-visiting org-contacts-file))
+       (delete-file org-contacts-file))))
+
 
 (ert-deftest should-find-contact-by-name ()
   (with-howdy-test-setup
