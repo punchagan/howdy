@@ -9,6 +9,7 @@
 ;;; Code:
 
 (require 'org-contacts)
+(require 'howdy-email)
 
 (defcustom howdy-jabber-domains nil
   "List of email domains accepted as jabber ids.
@@ -31,12 +32,6 @@ specified here."
   :type 'string
   :group 'howdy)
 
-(defun howdy-jabber-get-primary-email (contact)
-  "Get primary email id for CONTACT."
-  (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
-         (ids (org-contacts-split-property (or emails ""))))
-    (car ids)))
-
 (defun howdy-jabber--get-email-jid (contact)
   "Get email id for CONTACT to use as JID."
   (let* ((emails (cdr (assoc-string org-contacts-email-property (caddr contact))))
@@ -46,7 +41,7 @@ specified here."
          (cl-loop for domain in howdy-jabber-domains
                   for email = (car (seq-filter (lambda (email) (string-match domain email)) ids))
                   collect email))
-      (howdy-jabber-get-primary-email contact))))
+      (howdy-email-get-primary-email contact))))
 
 (defun howdy-jabber-get-jabber-id (contact)
   "Get jabber id for the CONTACT.

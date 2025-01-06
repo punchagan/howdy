@@ -317,7 +317,7 @@ If CONFIRM is non-nil, the user is prompted before proceeding."
   (cl-loop for contact in (howdy--get-contacts-for-tag tag)
            for name = (car contact)
            for jid = (howdy-jabber-get-jabber-id contact)
-           for email = (howdy-jabber-get-primary-email contact)
+           for email = (howdy-email-get-primary-email contact)
            do (insert (format "- [ ] %s " name))
            do (org-insert-link nil (format "elisp:(funcall howdy-email-function \"%s\")" email) "Email")
            do (insert " ")
