@@ -45,6 +45,7 @@
 
 (require 'org-contacts)
 (require 'howdy-jabber)
+(require 'howdy-mu4e)
 
 (defgroup howdy nil
   "Options for howdy."

@@ -1,8 +1,16 @@
-;; howdy-hooks.el -- a collection of utility hooks.
+;;; howdy-mu4e.el --- Howdy code for mu4e integration -*- lexical-binding: t; -*-
+;;
+;; This file is not part of GNU Emacs.
+;;
+;;; Commentary:
+;;
+;;  Howdy code for mu4e integration
+;;
+;;; Code:
 
-;; NOTE: The module doesn't require any of the dependent modules, and you
-;; should ensure that the modules required for the hooks you are using are
-;; available.
+(declare-function howdy-contacted "howdy")
+(declare-function mu4e-message-at-point "mu4e-message")
+(declare-function mu4e-message-field "mu4e-message")
 
 (defun howdy-mu4e-message-receive-hook ()
   (let* ((msg (mu4e-message-at-point 'noerror))
@@ -17,4 +25,5 @@
     (when (and to-me unread)
       (howdy-contacted info time))))
 
-(provide 'howdy-hooks)
+(provide 'howdy-mu4e)
+;;; howdy-mu4e.el ends here
