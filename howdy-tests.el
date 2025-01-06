@@ -19,7 +19,8 @@
        (write-file org-contacts-file))
      (unwind-protect ,@body
        (kill-buffer (find-buffer-visiting org-contacts-file))
-       (delete-file org-contacts-file))))
+       (delete-file org-contacts-file)
+       (setq org-contacts-last-update old-org-contacts-last-update))))
 
 
 (ert-deftest should-find-contact-by-name ()
