@@ -171,7 +171,7 @@ The following replacements are available:
             if (not (null tags))
             append (org-split-string tags ":"))))
 
-(defun howdy--contacted (info &optional time)
+(defun howdy-contacted (info &optional time)
   "Update last contacted TIME for a contact based on INFO.
 
 If TIME is nil, `current-time' is used."
@@ -339,8 +339,8 @@ time to use as the last contacted date."
     (setq info `((:name . ,name)))
     (setq contact (car (howdy--find-contacts info)))
     (if arg
-        (howdy--contacted info (org-read-date nil t nil nil (current-time)))
-      (howdy--contacted info))))
+        (howdy-contacted info (org-read-date nil t nil nil (current-time)))
+      (howdy-contacted info))))
 
 (defun howdy-clear-backlog (confirm)
   "Clear all backlog contacts by resetting last howdy to now.
@@ -426,12 +426,12 @@ If NAME is not provided, the user is prompted interactively."
 If TIME is nil, `current-time' is used.
 
 This function can only be called interactively.  Use
-`howdy--contacted' for doing stuff programmatically."
+`howdy-contacted' for doing stuff programmatically."
   (interactive)
   (let* ((name-or-tag (howdy--completing-read-name-or-tag))
          (time (org-read-date nil t nil nil (current-time)))
          (info `((:name . ,name-or-tag) (:tag . ,name-or-tag))))
-    (howdy--contacted info time)))
+    (howdy-contacted info time)))
 
 (provide 'howdy)
 

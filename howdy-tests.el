@@ -82,7 +82,7 @@
           (timestamp "[2015-05-28 Thu]")
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
-     (howdy--contacted info time)
+     (howdy-contacted info time)
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
@@ -97,8 +97,8 @@
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (old-time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
-     (howdy--contacted info time)
-     (howdy--contacted info old-time)
+     (howdy-contacted info time)
+     (howdy-contacted info old-time)
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
@@ -113,8 +113,8 @@
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (old-time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name))))
-     (howdy--contacted info old-time)
-     (howdy--contacted info time)
+     (howdy-contacted info old-time)
+     (howdy-contacted info time)
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
@@ -129,8 +129,8 @@
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (new-time (apply 'encode-time (org-parse-time-string new-timestamp)))
           (info `((:name . ,name))))
-     (howdy--contacted info time)
-     (howdy--contacted info new-time)
+     (howdy-contacted info time)
+     (howdy-contacted info new-time)
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
@@ -146,7 +146,7 @@
           (john-doe (car (howdy--find-contacts info)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
-     (howdy--contacted info time)
+     (howdy-contacted info time)
      (should (let* ((org-contacts-last-update nil))
                (member msg (howdy-howdy)))))))
 
@@ -157,7 +157,7 @@
           (john-doe (car (howdy--find-contacts info)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
-     (howdy--contacted info)
+     (howdy-contacted info)
      (should (let* ((org-contacts-last-update nil))
                (null (member msg (howdy-howdy))))))))
 
@@ -169,5 +169,5 @@
           (howdy-add-contact-function
            (lambda (info)
              (setq count (1+ count)))))
-     (howdy--contacted info)
+     (howdy-contacted info)
      (should (equal 1 count)))))
