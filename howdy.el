@@ -180,7 +180,9 @@ If TIME is nil, `current-time' is used."
     (when (and (= (length contacts) 0) howdy-add-contact-function)
       (ignore-errors (funcall howdy-add-contact-function info)))
     (cl-loop for contact in (howdy--find-contacts info)
-             do (howdy--contacted-contact contact time))))
+             do (howdy--contacted-contact contact time)))
+  (when (bound-and-true-p org--diary-sexp-entry-cache)
+    (clrhash org--diary-sexp-entry-cache)))
 
 (defun howdy--contacted-contact (contact time)
   "Update last contacted TIME for CONTACT."
