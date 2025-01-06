@@ -143,15 +143,22 @@
 (ert-deftest should-show-howdy-pending-contacts ()
   (with-howdy-test-setup
    (let* ((name "John Doe")
-          (timestamp "[2015-01-01 Thu]")
+          (timestamp
+           (format-time-string
+            "[%Y-%m-%d %a]"
+            (org-time-from-absolute
+             (calendar-gregorian-from-absolute
+              (-
+               (calendar-absolute-from-gregorian (calendar-current-date))
+               howdy-interval-default)))))
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name)))
           (john-doe (car (howdy--find-contacts info)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy-contacted info time)
-     (should (let* ((org-contacts-last-update nil))
-               (member msg (howdy-howdy)))))))
+     (let* ((org-contacts-last-update nil))
+       (should (member msg (howdy-howdy)))))))
 
 (ert-deftest should-not-show-update-contacts ()
   (with-howdy-test-setup
