@@ -32,6 +32,7 @@
   :group 'howdy)
 
 (declare-function howdy-completing-read-name-or-tag "howdy")
+(declare-function howdy-completing-read-name "howdy")
 (declare-function howdy-contact-tags "howdy")
 (declare-function howdy-contacted "howdy")
 (declare-function howdy-find-contacts "howdy")
@@ -77,7 +78,7 @@ If CONTACTS is provided, update them all on successful completion."
 (defun howdy-wa-send-message (contact message)
   "Send a WhatsApp MESSAGE to CONTACT using the WhatsApp script."
   (interactive
-   (let* ((contact-name (howdy-completing-read-name-or-tag))
+   (let* ((contact-name (howdy-completing-read-name))
           (message (read-string (format "Message for %s: " contact-name))))
      (list contact-name message)))
   (let* ((contact-data (car (howdy-find-contacts `((:name . ,contact)))))
