@@ -19,6 +19,8 @@
 ;;
 ;;; Code:
 
+(require 'org-contacts)
+
 (defcustom howdy-wa-script "howdy-wa"
   "Path to the Python script for WhatsApp messaging."
   :type 'string
