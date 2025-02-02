@@ -69,12 +69,12 @@
         (howdy-wa--run-command-async howdy-args)))))
 
 ;;;###autoload
-(defun howdy-wa-send-message-to-tag (tag message)
-  "Send a WhatsApp MESSAGE to all contacts associated with TAG."
+(defun howdy-wa-send-message-to-tag (tag text)
+  "Send a WhatsApp TEXT message to all contacts associated with TAG."
   (interactive
    (let* ((tag (org-completing-read "Tag: " (howdy--contact-tags)))
-          (message (read-string (format "Message for contacts tagged '%s': " tag))))
-     (list tag message)))
+          (text (read-string (format "Message for contacts tagged '%s': " tag))))
+     (list tag text)))
   (let ((contacts (howdy--get-contacts-for-tag tag)))
     (if (not contacts)
         (message "No contacts found with tag '%s'." tag)
@@ -88,7 +88,7 @@
                                        " "))
              (howdy-args (format "send %s %s"
                                  contacts-args
-                                 (shell-quote-argument message))))
+                                 (shell-quote-argument text))))
         (if (not phones)
             (message "No valid phone numbers found for contacts with tag '%s'." tag)
           (message "Sending message to contacts tagged '%s'..." tag)
