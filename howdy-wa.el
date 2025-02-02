@@ -33,11 +33,13 @@
 
 (declare-function howdy-completing-read-name-or-tag "howdy")
 (declare-function howdy-contact-tags "howdy")
+(declare-function howdy-contacted "howdy")
 (declare-function howdy-find-contacts "howdy")
 (declare-function howdy-get-contacts-for-tag "howdy")
 
-(defun howdy-wa--run-command-async (args)
-  "Run howdy-wa command with ARGS asynchronously."
+(defun howdy-wa--run-command-async (args &optional contacts)
+  "Run howdy-wa command with ARGS asynchronously.
+If CONTACTS is provided, update them all on successful completion."
   (let* ((output-buffer "*Howdy WhatsApp Output*")
          (executable (if howdy-wa-headless
                          (format "%s --headless"
@@ -47,17 +49,29 @@
     (with-current-buffer (get-buffer-create output-buffer)
       (erase-buffer)
       (insert (format "Running: %s\n\n" command)))
-    (make-process
-     :name "howdy-wa-process"
-     :buffer output-buffer
-     :command (list shell-file-name shell-command-switch command)
-     :sentinel (lambda (process event)
-                 (when (memq (process-status process) '(exit signal))
-                   (with-current-buffer (process-buffer process)
-                     (goto-char (point-max))
-                     (insert (format "\nProcess finished with %s.\n" event))
-                     (message "Howdy WhatsApp command finished: %s" event))
-                   (display-buffer (process-buffer process)))))))
+    (let ((process (make-process
+                    :name "howdy-wa-process"
+                    :buffer output-buffer
+                    :command (list shell-file-name shell-command-switch command)
+                    :sentinel (lambda (process event)
+                                (when (memq (process-status process) '(exit signal))
+                                  (with-current-buffer (process-buffer process)
+                                    (goto-char (point-max))
+                                    (insert (format "\nProcess finished with %s.\n" event))
+                                    ;; Check if process ended successfully (exit status 0)
+                                    (when (and (equal (process-status process) 'exit)
+                                               (= (process-exit-status process) 0))
+                                      (cond
+                                       ((listp contacts)  ; Multiple contacts (from tag)
+                                        (dolist (contact contacts)
+                                          (howdy-contacted `((:name . ,(car contact)))))
+                                        (message "Messages sent successfully and all contacts updated"))
+                                       (contacts  ; Single contact (string)
+                                        (howdy-contacted `((:name . ,contacts)))
+                                        (message "Message sent successfully and contact updated")))
+                                      (message "Howdy WhatsApp command status: %s" event)))
+                                  (display-buffer (process-buffer process)))))))
+      process)))
 
 ;;;###autoload
 (defun howdy-wa-send-message (contact message)
@@ -73,7 +87,7 @@
       (let ((howdy-args (format "send --contact %s %s"
                                 (shell-quote-argument phone)
                                 (shell-quote-argument message))))
-        (howdy-wa--run-command-async howdy-args)))))
+        (howdy-wa--run-command-async howdy-args contact)))))
 
 ;;;###autoload
 (defun howdy-wa-send-message-to-tag (tag text)
@@ -101,7 +115,7 @@
         (if (not phones)
             (message "No valid phone numbers found for contacts with tag '%s'." tag)
           (message "Sending message to contacts tagged '%s'..." tag)
-          (howdy-wa--run-command-async howdy-args))))))
+          (howdy-wa--run-command-async howdy-args contacts))))))
 
 ;;;###autoload
 (defun howdy-wa-last-contacted (contact)
@@ -114,8 +128,7 @@
         (message "No phone number found for %s." contact)
       (let ((howdy-args (format "last-contacted %s"
                                 (shell-quote-argument phone))))
-        (howdy-wa--run-command-async howdy-args)))))
-
+        (howdy-wa--run-command-async howdy-args nil)))))
 
 (provide 'howdy-wa)
 ;;; howdy-wa.el ends here
