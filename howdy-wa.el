@@ -31,6 +31,11 @@
   :type 'boolean
   :group 'howdy)
 
+(declare-function howdy-completing-read-name-or-tag "howdy")
+(declare-function howdy-contact-tags "howdy")
+(declare-function howdy-find-contacts "howdy")
+(declare-function howdy-get-contacts-for-tag "howdy")
+
 (defun howdy-wa--run-command-async (args)
   "Run howdy-wa command with ARGS asynchronously."
   (let* ((output-buffer "*Howdy WhatsApp Output*")
