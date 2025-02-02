@@ -28,14 +28,14 @@
    (let ((name "John Doe"))
      (should (string=
               name
-              (let ((contact (car (howdy--find-contacts `((:name . ,name))))))
+              (let ((contact (car (howdy-find-contacts `((:name . ,name))))))
                 (car contact)))))))
 
 (ert-deftest should-not-find-contact ()
   (with-howdy-test-setup
    (let ((name "Paul"))
      (should (null
-              (let ((contact (car (howdy--find-contacts `((:name . ,name))))))
+              (let ((contact (car (howdy-find-contacts `((:name . ,name))))))
                 contact))))))
 
 (ert-deftest should-find-contact-by-email ()
@@ -43,7 +43,7 @@
    (let ((email "john.doe@example.net"))
      (should (string=
               email
-              (let ((contact (car (howdy--find-contacts `((:email . ,email))))))
+              (let ((contact (car (howdy-find-contacts `((:email . ,email))))))
                 (cdr (assoc-string "EMAIL" (caddr contact)))))))))
 
 (ert-deftest should-find-contact-by-phone ()
@@ -51,21 +51,21 @@
    (let ((phone "999-999-777"))
      (should (string=
               phone
-              (let ((contact (car (howdy--find-contacts `((:phone . ,phone))))))
+              (let ((contact (car (howdy-find-contacts `((:phone . ,phone))))))
                 (cdr (assoc-string "PHONE" (caddr contact)))))))))
 
 (ert-deftest should-find-contact-by-other-phone ()
   (with-howdy-test-setup
    (let ((phone "+91888999777"))
      (should (not (null
-                   (let ((contact (car (howdy--find-contacts `((:phone . ,phone))))))
+                   (let ((contact (car (howdy-find-contacts `((:phone . ,phone))))))
                      contact)))))))
 
 (ert-deftest should-not-find-contact-by-wrong-phone ()
   (with-howdy-test-setup
    (let ((phone "777"))
      (should (null
-              (let ((contact (car (howdy--find-contacts `((:phone . ,phone))))))
+              (let ((contact (car (howdy-find-contacts `((:phone . ,phone))))))
                 contact))))))
 
 (ert-deftest should-set-interval ()
@@ -76,7 +76,7 @@
      (should (string=
               (number-to-string interval)
               (let* ((org-contacts-last-update nil)
-                     (contact (car (howdy--find-contacts `((:name . ,name))))))
+                     (contact (car (howdy-find-contacts `((:name . ,name))))))
                 (cdr (assoc-string howdy-interval-property (caddr contact)))))))))
 
 (ert-deftest should-set-contacted ()
@@ -89,7 +89,7 @@
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
-                     (contact (car (howdy--find-contacts info))))
+                     (contact (car (howdy-find-contacts info))))
                 (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
 (ert-deftest should-not-set-older-timestamp ()
@@ -105,7 +105,7 @@
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
-                     (contact (car (howdy--find-contacts info))))
+                     (contact (car (howdy-find-contacts info))))
                 (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
 (ert-deftest should-update-timestamp ()
@@ -121,7 +121,7 @@
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
-                     (contact (car (howdy--find-contacts info))))
+                     (contact (car (howdy-find-contacts info))))
                 (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
 (ert-deftest should-not-update-with-close-timestamp ()
@@ -137,7 +137,7 @@
      (should (string=
               timestamp
               (let* ((org-contacts-last-update nil)
-                     (contact (car (howdy--find-contacts info))))
+                     (contact (car (howdy-find-contacts info))))
                 (cdr (assoc-string howdy-last-contacted-property (caddr contact)))))))))
 
 (ert-deftest should-show-howdy-pending-contacts ()
@@ -153,7 +153,7 @@
                howdy-interval-default)))))
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name)))
-          (john-doe (car (howdy--find-contacts info)))
+          (john-doe (car (howdy-find-contacts info)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy-contacted info time)
@@ -164,7 +164,7 @@
   (with-howdy-test-setup
    (let* ((name "John Doe")
           (info `((:name . ,name)))
-          (john-doe (car (howdy--find-contacts info)))
+          (john-doe (car (howdy-find-contacts info)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy-contacted info)

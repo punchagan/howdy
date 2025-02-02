@@ -137,15 +137,15 @@ The following replacements are available:
    "^0+" ""
    (replace-regexp-in-string "\\(\s\\|-\\)+" ""  phone-number)))
 
-(defun howdy--completing-read-name-or-tag ()
+(defun howdy-completing-read-name-or-tag ()
   "Prompt the user for a name or tag to search for."
   (org-completing-read
    "Name or Tag: "
    (append
-    (howdy--contact-tags)
+    (howdy-contact-tags)
     (mapcar (lambda (x) (org-no-properties (car x))) (org-contacts-filter)))))
 
-(defun howdy--contact-tags ()
+(defun howdy-contact-tags ()
   "Get all the tags from the contacts db."
   (delete-dups
    (cl-loop for contact in  (org-contacts-db)
@@ -215,7 +215,7 @@ If TIME is nil, `current-time' is used."
                                                  (howdy--endswith phone number))))))
                                (caddr contact))
                 collect contact))
-     (when tag (howdy--get-contacts-for-tag tag))
+     (when tag (howdy-get-contacts-for-tag tag))
      (org-contacts-filter (concat "^" name "$") nil props))))
 
 (defun howdy--format-contact (contact &optional format)
@@ -246,7 +246,7 @@ If TIME is nil, `current-time' is used."
        (time-to-number-of-days (time-subtract at-time (apply 'encode-time last-contacted)))
        interval)))))
 
-(defun howdy--get-contacts-for-tag (tag)
+(defun howdy-get-contacts-for-tag (tag)
   "Return all contacts with the given TAG."
   (cl-loop for contact in (org-contacts-db)
            for tags = (cdr (assoc-string "ALLTAGS" (caddr contact)))
@@ -311,11 +311,11 @@ If CONFIRM is non-nil, the user is prompted before proceeding."
 
 (defun howdy-create-tag-buffer (tag)
   "Create buffer to contact people with specified TAG."
-  (interactive (list (org-completing-read "Tag: " (howdy--contact-tags))))
+  (interactive (list (org-completing-read "Tag: " (howdy-contact-tags))))
   (switch-to-buffer (format "*howdy-%s*" tag))
   (delete-region (point-min) (point-max))
   (org-mode)
-  (cl-loop for contact in (howdy--get-contacts-for-tag tag)
+  (cl-loop for contact in (howdy-get-contacts-for-tag tag)
            for name = (car contact)
            for jid = (howdy-jabber-get-jabber-id contact)
            for email = (howdy-email-get-primary-email contact)
@@ -384,7 +384,7 @@ If TIME is nil, `current-time' is used.
 This function can only be called interactively.  Use
 `howdy-contacted' for doing stuff programmatically."
   (interactive)
-  (let* ((name-or-tag (howdy--completing-read-name-or-tag))
+  (let* ((name-or-tag (howdy-completing-read-name-or-tag))
          (time (org-read-date nil t nil nil (current-time)))
          (info `((:name . ,name-or-tag) (:tag . ,name-or-tag))))
     (howdy-contacted info time)))

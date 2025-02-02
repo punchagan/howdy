@@ -58,10 +58,10 @@
 (defun howdy-wa-send-message (contact message)
   "Send a WhatsApp MESSAGE to CONTACT using the WhatsApp script."
   (interactive
-   (let* ((contact-name (howdy--completing-read-name-or-tag))
+   (let* ((contact-name (howdy-completing-read-name-or-tag))
           (message (read-string (format "Message for %s: " contact-name))))
      (list contact-name message)))
-  (let* ((contact-data (car (howdy--find-contacts `((:name . ,contact)))))
+  (let* ((contact-data (car (howdy-find-contacts `((:name . ,contact)))))
          (phone (cdr (assoc-string org-contacts-tel-property (caddr contact-data)))))
     (if (not phone)
         (message "No phone number found for %s." contact)
@@ -74,10 +74,10 @@
 (defun howdy-wa-send-message-to-tag (tag text)
   "Send a WhatsApp TEXT message to all contacts associated with TAG."
   (interactive
-   (let* ((tag (org-completing-read "Tag: " (howdy--contact-tags)))
+   (let* ((tag (org-completing-read "Tag: " (howdy-contact-tags)))
           (text (read-string (format "Message for contacts tagged '%s': " tag))))
      (list tag text)))
-  (let ((contacts (howdy--get-contacts-for-tag tag)))
+  (let ((contacts (howdy-get-contacts-for-tag tag)))
     (if (not contacts)
         (message "No contacts found with tag '%s'." tag)
       (let* ((phones
@@ -102,8 +102,8 @@
 (defun howdy-wa-last-contacted (contact)
   "Check the last contacted time for CONTACT using the Python script."
   (interactive
-   (list (howdy--completing-read-name-or-tag)))
-  (let* ((contact-data (car (howdy--find-contacts `((:name . ,contact)))))
+   (list (howdy-completing-read-name-or-tag)))
+  (let* ((contact-data (car (howdy-find-contacts `((:name . ,contact)))))
          (phone (cdr (assoc-string org-contacts-tel-property (caddr contact-data)))))
     (if (not phone)
         (message "No phone number found for %s." contact)
