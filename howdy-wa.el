@@ -78,14 +78,16 @@
   (let ((contacts (howdy--get-contacts-for-tag tag)))
     (if (not contacts)
         (message "No contacts found with tag '%s'." tag)
-      (let* ((phones (delq nil
-                           (mapcar (lambda (contact)
-                                     (cdr (assoc-string org-contacts-tel-property (caddr contact))))
-                                   contacts)))
-             (contacts-args (mapconcat (lambda (phone)
-                                         (format "--contact %s" (shell-quote-argument phone)))
-                                       phones
-                                       " "))
+      (let* ((phones
+              (delq nil
+                    (mapcar (lambda (contact)
+                              (cdr (assoc-string org-contacts-tel-property (caddr contact))))
+                            contacts)))
+             (contacts-args
+              (mapconcat (lambda (phone)
+                           (format "--contact %s" (shell-quote-argument phone)))
+                         phones
+                         " "))
              (howdy-args (format "send %s %s"
                                  contacts-args
                                  (shell-quote-argument text))))
