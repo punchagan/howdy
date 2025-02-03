@@ -25,22 +25,35 @@
 ;;; Commentary:
 
 ;; Howdy! is a library to help you keep in touch with people.
-
-;; The library currently only supports using org-contacts to maintain your
-;; contacts database.
-
+;;
+;; You can use it to keep track of when you last contacted someone, and to
+;; remind you to contact them again after a certain interval. It can also help
+;; you generate an agenda view of people you need to contact.
+;;
+;; To use Howdy!, you need to have a contacts database that is managed by
+;; `org-contacts'.
+;;
 ;; You can configure the frequency at which you wish to contact a person by
 ;; adding a `HOWDY_INTERVAL' property to your contacts.
 
-;; You can update information about when you last contacted a person, by using
-;; the `howdy' function.
-
-;; To get agenda entries for out-of-touch contacts, use `howdy-howdy'. For
-;; example, add an entry like the one below to one of your org-contacts-files.
+;; You can use the `howdy' function to mark a contact as contacted,
+;; interactively. This will update the `LAST_HOWDY' property with the current
+;; date. You can use the `howdy-contacted' function to mark a contact as
+;; contacted, programatically. For example, look at the hooks provided in the
+;; various integrations like `howdy-jabber', `howdy-email', `howdy-wa', etc.
+;;
+;; Howdy can display a list of contacts that you need to contact, in an agenda
+;; view. To enable this, add an entry like the one below to one of your
+;; org-contacts-files.
 ;;
 ;; : * Keep in touch
 ;; : %%(howdy-howdy)
-
+;;
+;; You can also use the `howdy-agenda-contacted' function to mark a contact as
+;; contacted from an org agenda buffer. You can bind this function to a
+;; keybinding in the `org-agenda-mode-map' to make it easy to mark a contact as
+;; contacted from an Org agenda.
+;;
 ;;; Code:
 
 (require 'org-contacts)
