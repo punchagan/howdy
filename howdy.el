@@ -99,7 +99,10 @@ The following replacements are available:
   :group 'howdy)
 
 (defcustom howdy-max-contacts 5
-  "Limit for the number of contacts to show in the agenda."
+  "Limit for the number of contacts to show in the agenda.
+
+It can be set to 0 or a negative number to turn off limiting the
+number of contacts shown."
   :type 'integer
   :group 'howdy)
 
@@ -378,7 +381,8 @@ FORMAT is a string matching the following format specification:
       (setq contacts (howdy--sorted-backlog-contacts contacts))))
     (setq entries (cl-loop for contact in contacts
                            collect (howdy--format-contact contact format)))
-    (if (> (length entries) howdy-max-contacts)
+    (if (and (> howdy-max-contacts 0)
+             (> (length entries) howdy-max-contacts))
         (cl-subseq entries 0 howdy-max-contacts)
       entries)))
 
