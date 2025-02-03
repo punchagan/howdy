@@ -310,21 +310,24 @@ If TIME is nil, `current-time' is used."
   "Check if S begins with BEGIN."
   (org-string-match-p (format "^%s.*$" begin) s))
 
+(defun howdy--agenda-get-info ()
+  "Get the `info' for contact at point in an `org-agenda' buffer."
+  (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
+         (name (when (string-match org-link-bracket-re txt)
+                 (match-string 2 txt))))
+    (if (not name)
+        (error "Could not extract contact name from agenda entry")
+      `((:name . ,name)))))
+
 (defun howdy-agenda-contacted (arg)
   "Mark a contact as contacted from an `org-agenda' buffer.
 If ARG is non-nil, use the current time as the last contacted date.
 Otherwise, prompt the user for a date."
   (interactive "P")
-  (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
-         (name (when (string-match org-link-bracket-re txt)
-                 (match-string 2 txt)))
-         (info `((:name . ,name)))
-         (contact (car (howdy--find-contacts info))))
-    (if (not name)
-        (error "Could not extract contact name from agenda entry")
-      (if arg
-          (howdy-contacted info)
-        (howdy-contacted info (org-read-date nil t nil nil (current-time)))))))
+  (let* ((info (howdy--agenda-get-info)))
+    (if arg
+        (howdy-contacted info)
+      (howdy-contacted info (org-read-date nil t nil nil (current-time))))))
 
 (defun howdy-clear-backlog (confirm)
   "Clear all backlog contacts by resetting last howdy to now.
