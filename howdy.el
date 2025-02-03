@@ -283,10 +283,11 @@ If TIME is nil, `current-time' is used."
   (org-string-match-p (format "^%s.*$" begin) s))
 
 (defun howdy-agenda-contacted (arg)
-  "Mark a contact as contacted from a org agenda buffer.
+  "Mark a contact as contacted from a `org-agenda' buffer.
 
-If ARG is provided to the function, the user is prompted for the
-time to use as the last contacted date."
+By default, it prompts the user for the date to use as the last
+contacted date. If the prefix argument ARG is non-nil, it will
+use the current time as the last contacted date."
   (interactive "P")
   (let* ((txt (org-no-properties (org-get-at-bol 'txt)))
          name info contact)
@@ -295,8 +296,8 @@ time to use as the last contacted date."
     (setq info `((:name . ,name)))
     (setq contact (car (howdy--find-contacts info)))
     (if arg
-        (howdy-contacted info (org-read-date nil t nil nil (current-time)))
-      (howdy-contacted info))))
+        (howdy-contacted info)
+      (howdy-contacted info (org-read-date nil t nil nil (current-time))))))
 
 (defun howdy-clear-backlog (confirm)
   "Clear all backlog contacts by resetting last howdy to now.
