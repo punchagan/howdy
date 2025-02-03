@@ -329,6 +329,25 @@ Otherwise, prompt the user for a date."
         (howdy-contacted info)
       (howdy-contacted info (org-read-date nil t nil nil (current-time))))))
 
+(defun howdy-agenda-untrack-contact (no-confirm)
+  "Stop tracking the contact at point in `org-agenda' buffer.
+
+Unset HOWDY_INTERVAL and LAST_HOWDY for the contact at point, and
+stop tracking the contact via howdy. If NO-CONFIRM is non-nil,
+the user is not prompted for confirmation."
+  (interactive "P")
+  (let* ((info (howdy--agenda-get-info))
+         (contact (car (howdy--find-contacts info))))
+    (when (and (not no-confirm)
+               (not (yes-or-no-p "Stop tracking this contact?")))
+      (error "Aborted"))
+    (howdy--with-contact
+     contact
+     (org-delete-property howdy-interval-property)
+     (org-delete-property howdy-last-contacted-property))
+    (when (bound-and-true-p org--diary-sexp-entry-cache)
+      (clrhash org--diary-sexp-entry-cache))))
+
 (defun howdy-clear-backlog (confirm)
   "Clear all backlog contacts by resetting last howdy to now.
 
