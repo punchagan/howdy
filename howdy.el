@@ -361,12 +361,8 @@ If CONFIRM is non-nil, the user is prompted before proceeding."
 (defun howdy-howdy (&optional format)
   "Return agenda entries for out-of-touch contacts.
 
-FORMAT is a string matching the following format specification:
-
-  %h - Heading name
-  %l - Link to the heading
-  %p - Phone number
-  %e - Email"
+FORMAT is a string matching the format specification of
+`howdy-agenda-entry-format'."
   (let* ((date (or (bound-and-true-p org-agenda-current-date)
                    (calendar-current-date)))
          (at-time (org-time-from-absolute
