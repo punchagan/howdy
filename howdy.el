@@ -89,6 +89,8 @@
 The following replacements are available:
 
   %h - Heading name
+  %b - Show backlog duration
+  %B - Show backlog duration along with last contacted date
   %l - Link to the heading
   %p - Phone number
   %e - Link to email
@@ -137,12 +139,21 @@ The following replacements are available:
            if (cdr (assoc "BACKLOG" (caddr contact)))
            collect contact))
 
-(defun howdy--backlog-format-str (contact)
-  "Return the format string for displaying a CONTACT."
-  (let ((backlog (round (or (cdr (assoc "BACKLOG" (caddr contact))) 0))))
+(defun howdy--backlog-format-str (contact &optional last-contacted)
+  "Return the format string for displaying a CONTACT.
+
+If LAST-CONTACTED is non-nil, the last contacted date is
+displayed along with the number of backlog days."
+  (let ((backlog (round (or (cdr (assoc "BACKLOG" (caddr contact))) 0)))
+        (last-contacted (and last-contacted
+                             (cdr (assoc "LAST_HOWDY" (caddr contact))))))
     (if (> backlog 0)
-        (format " [%sx]" backlog)
-      "")))
+        (if last-contacted
+            (format " %s [%sx]" last-contacted backlog)
+          (format " [%sx]" backlog))
+      (if last-contacted
+          (format " %s" last-contacted)
+        ""))))
 
 (defun howdy--cleanup-phone (phone-number)
   "Strip off all spaces and dashes from a PHONE-NUMBER."
@@ -236,7 +247,8 @@ If TIME is nil, `current-time' is used."
   (format-spec (or format howdy-agenda-entry-format)
                `((?l . ,(org-with-point-at (cadr contact) (org-store-link nil)))
                  (?h . ,(car contact))
-                 (?b . ,(howdy--backlog-format-str contact))
+                 (?b . ,(howdy--backlog-format-str contact nil))
+                 (?B . ,(howdy--backlog-format-str contact t))
                  (?p . ,(cdr (assoc-string org-contacts-tel-property (caddr contact))))
                  (?e . ,(howdy--get-email-link contact))
                  (?E . ,(howdy--get-email-links contact))) 'ignore-missing))
