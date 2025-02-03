@@ -84,7 +84,7 @@
   :type 'string
   :group 'howdy)
 
-(defcustom howdy-agenda-entry-format "Say Howdy%b: %l (%p) %E"
+(defcustom howdy-agenda-entry-format "Howdy!%b: %l (%p) %E"
   "Format of the \"say howdy!\" agenda entry.
 The following replacements are available:
 
