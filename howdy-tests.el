@@ -154,11 +154,13 @@
           (time (apply 'encode-time (org-parse-time-string timestamp)))
           (info `((:name . ,name)))
           (john-doe (car (howdy-find-contacts info)))
+          ;; Add the timestamp property before generating expected output
+          (_ (push `(,howdy-last-contacted-property . ,timestamp) (caddr john-doe)))
           (msg (howdy--format-contact john-doe)))
      (howdy-set-interval name howdy-interval-default)
      (howdy-contacted info time)
      (let* ((org-contacts-last-update nil))
-       (should (member msg (howdy-howdy)))))))
+       (should (string= msg (nth 0 (howdy-howdy))))))))
 
 (ert-deftest should-not-show-update-contacts ()
   (with-howdy-test-setup
