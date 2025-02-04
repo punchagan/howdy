@@ -310,11 +310,22 @@ If TIME is nil, `current-time' is used."
       "")))
 
 (defun howdy--sorted-backlog-contacts (contacts)
-  "Sort CONTACTS based on the backlog duration."
+  "Sort CONTACTS by backlog duration (desc) followed by howdy interval (asc)."
   (sort contacts
         (lambda (x y)
-          (> (cdr (assoc "BACKLOG" (caddr x)))
-             (cdr (assoc "BACKLOG" (caddr y)))))))
+          (let ((backlog-x (cdr (assoc "BACKLOG" (caddr x))))
+                (backlog-y (cdr (assoc "BACKLOG" (caddr y))))
+                (interval-x (ignore-errors
+                              (string-to-number
+                               (cdr (assoc howdy-interval-property (caddr x))))))
+                (interval-y (ignore-errors
+                              (string-to-number
+                               (cdr (assoc howdy-interval-property (caddr y)))))))
+            (if (/= backlog-x backlog-y)
+                ;; Primary: Sort by backlog (descending)
+                (> backlog-x backlog-y)
+              ;; Secondary: Sort by howdy interval (ascending)
+              (< interval-x interval-y))))))
 
 (defun howdy--startswith (s begin)
   "Check if S begins with BEGIN."
