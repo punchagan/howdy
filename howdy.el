@@ -217,6 +217,7 @@ If TIME is nil, `current-time' is used."
 (defun howdy--find-contacts (info)
   "Find contact using the given INFO."
   (let* ((name (cdr (assoc :name info)))
+         (name-re (concat "^" (regexp-quote (or name "")) "$"))
          (email (cdr (assoc :email info)))
          (phone (cdr (assoc :phone info)))
          (clean-phone (and phone (howdy--cleanup-phone phone)))
@@ -226,11 +227,11 @@ If TIME is nil, `current-time' is used."
      (and email
           (or
            ;; Search by name + email (in Jabber property)
-           (org-contacts-filter (concat "^" name "$")
+           (org-contacts-filter name-re
                                 nil
                                 `(,howdy-jabber-property . ,email))
            ;; Search by name + email (in email property)
-           (org-contacts-filter (concat "^" name "$")
+           (org-contacts-filter name-re
                                 nil
                                 `(,org-contacts-email-property . ,email))))
 
@@ -252,7 +253,7 @@ If TIME is nil, `current-time' is used."
           (howdy-get-contacts-for-tag tag))
 
      ;; Default search
-     (org-contacts-filter (concat "^" name "$") nil nil))))
+     (org-contacts-filter name-re nil nil))))
 
 (defun howdy--format-contact (contact &optional format)
   "Format a CONTACT based on FORMAT."
