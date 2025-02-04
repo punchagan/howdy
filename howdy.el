@@ -219,15 +219,21 @@ If TIME is nil, `current-time' is used."
   (let ((name (cdr (assoc :name info)))
         (email (cdr (assoc :email info)))
         (phone (cdr (assoc :phone info)))
-        (tag (cdr (assoc :tag info)))
-        props)
+        (tag (cdr (assoc :tag info))))
     (or
+     ;; Search by name + email (Jabber)
      (when email
-       (setq props `(,howdy-jabber-property . ,email))
-       (org-contacts-filter (concat "^" name "$") nil props))
+       (org-contacts-filter (concat "^" name "$")
+                            nil
+                            `(,howdy-jabber-property . ,email)))
+
+     ;; Search by name + email
      (when email
-       (setq props `(,org-contacts-email-property . ,email))
-       (org-contacts-filter (concat "^" name "$") nil props))
+       (org-contacts-filter (concat "^" name "$")
+                            nil
+                            `(,org-contacts-email-property . ,email)))
+
+     ;; Search by phone
      (when phone
        (cl-loop for contact in (org-contacts-db)
                 if (cl-find-if (lambda (prop)
@@ -242,8 +248,12 @@ If TIME is nil, `current-time' is used."
                                                  (howdy--endswith phone number))))))
                                (caddr contact))
                 collect contact))
+
+     ;; Search by tag
      (when tag (howdy-get-contacts-for-tag tag))
-     (org-contacts-filter (concat "^" name "$") nil props))))
+
+     ;; Default search
+     (org-contacts-filter (concat "^" name "$") nil nil))))
 
 (defun howdy--format-contact (contact &optional format)
   "Format a CONTACT based on FORMAT."
