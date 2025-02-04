@@ -222,17 +222,17 @@ If TIME is nil, `current-time' is used."
          (clean-phone (and phone (howdy--cleanup-phone phone)))
          (tag (cdr (assoc :tag info))))
     (or
-     ;; Search by name + email (Jabber)
-     (when email
-       (org-contacts-filter (concat "^" name "$")
-                            nil
-                            `(,howdy-jabber-property . ,email)))
-
      ;; Search by name + email
      (when email
-       (org-contacts-filter (concat "^" name "$")
-                            nil
-                            `(,org-contacts-email-property . ,email)))
+       (or
+        ;; Search by name + email (in Jabber property)
+        (org-contacts-filter (concat "^" name "$")
+                             nil
+                             `(,howdy-jabber-property . ,email))
+        ;; Search by name + email (in email property)
+        (org-contacts-filter (concat "^" name "$")
+                             nil
+                             `(,org-contacts-email-property . ,email))))
 
      ;; Search by phone
      (when (and clean-phone (>= (length clean-phone) 7))
