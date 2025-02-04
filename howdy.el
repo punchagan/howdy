@@ -216,10 +216,11 @@ If TIME is nil, `current-time' is used."
 
 (defun howdy--find-contacts (info)
   "Find contact using the given INFO."
-  (let ((name (cdr (assoc :name info)))
-        (email (cdr (assoc :email info)))
-        (phone (cdr (assoc :phone info)))
-        (tag (cdr (assoc :tag info))))
+  (let* ((name (cdr (assoc :name info)))
+         (email (cdr (assoc :email info)))
+         (phone (cdr (assoc :phone info)))
+         (clean-phone (and phone (howdy--cleanup-phone phone)))
+         (tag (cdr (assoc :tag info))))
     (or
      ;; Search by name + email (Jabber)
      (when email
@@ -234,23 +235,21 @@ If TIME is nil, `current-time' is used."
                             `(,org-contacts-email-property . ,email)))
 
      ;; Search by phone
-     (when phone
+     (when (and clean-phone (>= (length clean-phone) 7))
        (cl-loop for contact in (org-contacts-db)
-                if (cl-find-if (lambda (prop)
-                                 (and (howdy--startswith (car prop) org-contacts-tel-property)
-                                      (let* ((number (howdy--cleanup-phone (cdr prop)))
-                                             (n (length number))
-                                             (phone (howdy--cleanup-phone phone))
-                                             (p (length phone)))
-                                        (and (>= n 7)
-                                             (>= p 7)
-                                             (or (howdy--endswith number phone)
-                                                 (howdy--endswith phone number))))))
-                               (caddr contact))
+                if (cl-some (lambda (prop)
+                              (and (howdy--startswith (car prop) org-contacts-tel-property)
+                                   (let* ((number (howdy--cleanup-phone (cdr prop)))
+                                          (n (length number)))
+                                     (and (>= n 7)
+                                          (or (howdy--endswith number clean-phone)
+                                              (howdy--endswith clean-phone number))))))
+                            (caddr contact))
                 collect contact))
 
      ;; Search by tag
-     (when tag (howdy-get-contacts-for-tag tag))
+     (when tag
+       (howdy-get-contacts-for-tag tag))
 
      ;; Default search
      (org-contacts-filter (concat "^" name "$") nil nil))))
