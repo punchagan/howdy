@@ -57,8 +57,6 @@ If CONTACTS is provided, update them all on successful completion."
                     :sentinel (lambda (process event)
                                 (when (memq (process-status process) '(exit signal))
                                   (with-current-buffer (process-buffer process)
-                                    (goto-char (point-max))
-                                    (insert (format "\nProcess finished with %s.\n" event))
                                     ;; Check if process ended successfully (exit status 0)
                                     (when (and (equal (process-status process) 'exit)
                                                (= (process-exit-status process) 0))
