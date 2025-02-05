@@ -401,6 +401,7 @@ If CONFIRM is non-nil, the user is prompted before proceeding."
   (sort contacts
         (lambda (x y) (> (random t) (random t)))))
 
+;;;###autoload
 (defun howdy-howdy (&optional format)
   "Return agenda entries for out-of-touch contacts.
 
@@ -444,6 +445,7 @@ If NAME is not provided, the user is prompted interactively."
        contact
        (org-set-property howdy-interval-property (number-to-string interval))))))
 
+;;;###autoload
 (defun howdy ()
   "Update last contacted time for the contact.
 
