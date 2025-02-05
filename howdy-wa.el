@@ -38,6 +38,31 @@
 (declare-function howdy-find-contacts "howdy")
 (declare-function howdy-get-contacts-for-tag "howdy")
 
+(defun howdy-wa--process-sentinel (process event args contacts)
+  "Sentinel function for the howdy-wa-process.
+
+PROCESS is the process that ended and EVENT is the event that
+caused it to end. ARGS are the arguments that were passed to the
+howdy-wa command and CONTACTS are the contacts that were
+processed by the command."
+  (when (memq (process-status process) '(exit signal))
+    (with-current-buffer (process-buffer process)
+      ;; Check if process ended successfully (exit status 0)
+      (when (and (equal (process-status process) 'exit)
+                 (= (process-exit-status process) 0))
+        (cond
+                                        ; Multiple contacts (from tag)
+         ((and (listp contacts) (string-prefix-p "send" args))
+          (dolist (contact contacts)
+            (howdy-contacted `((:name . ,(car contact)))))
+          (message "Messages sent successfully and all contacts updated"))
+                                        ; Single contact (string)
+         ((and contacts (string-prefix-p "send" args))
+          (howdy-contacted `((:name . ,contacts)))
+          (message "Message sent successfully and contact updated")))
+        (message "Howdy WhatsApp command status: %s" event)))
+    (display-buffer (process-buffer process))))
+
 (defun howdy-wa--run-command-async (args &optional contacts)
   "Run howdy-wa command with ARGS asynchronously.
 If CONTACTS is provided, update them all on successful completion."
@@ -55,23 +80,7 @@ If CONTACTS is provided, update them all on successful completion."
                     :buffer output-buffer
                     :command (list shell-file-name shell-command-switch command)
                     :sentinel (lambda (process event)
-                                (when (memq (process-status process) '(exit signal))
-                                  (with-current-buffer (process-buffer process)
-                                    ;; Check if process ended successfully (exit status 0)
-                                    (when (and (equal (process-status process) 'exit)
-                                               (= (process-exit-status process) 0))
-                                      (cond
-                                        ; Multiple contacts (from tag)
-                                       ((and (listp contacts) (string-prefix-p "send" args))
-                                        (dolist (contact contacts)
-                                          (howdy-contacted `((:name . ,(car contact)))))
-                                        (message "Messages sent successfully and all contacts updated"))
-                                        ; Single contact (string)
-                                       ((and contacts (string-prefix-p "send" args))
-                                        (howdy-contacted `((:name . ,contacts)))
-                                        (message "Message sent successfully and contact updated")))
-                                      (message "Howdy WhatsApp command status: %s" event)))
-                                  (display-buffer (process-buffer process)))))))
+                                (howdy-wa--process-sentinel process event args contacts)))))
       process)))
 
 ;;;###autoload
