@@ -184,11 +184,11 @@ displayed along with the number of backlog days."
   "Update last contacted TIME for a contact based on INFO.
 
 If TIME is nil, `current-time' is used."
-  (let ((contacts (howdy--find-contacts info)))
+  (let ((contacts (howdy-find-contacts info)))
     (unless time (setq time (current-time)))
     (when (and (= (length contacts) 0) howdy-add-contact-function)
       (ignore-errors (funcall howdy-add-contact-function info)))
-    (cl-loop for contact in (howdy--find-contacts info)
+    (cl-loop for contact in (howdy-find-contacts info)
              do (howdy--contacted-contact contact time)))
   (when (bound-and-true-p org--diary-sexp-entry-cache)
     (clrhash org--diary-sexp-entry-cache)))
@@ -214,7 +214,7 @@ If TIME is nil, `current-time' is used."
   "Check if S ends with END."
   (org-string-match-p (format "^.*%s$" end) s))
 
-(defun howdy--find-contacts (info)
+(defun howdy-find-contacts (info)
   "Find contact using the given INFO."
   (let* ((name (cdr (assoc :name info)))
          (name-re (concat "^" (regexp-quote (or name "")) "$"))
@@ -358,7 +358,7 @@ stop tracking the contact via howdy. If NO-CONFIRM is non-nil,
 the user is not prompted for confirmation."
   (interactive "P")
   (let* ((info (howdy--agenda-get-info))
-         (contact (car (howdy--find-contacts info))))
+         (contact (car (howdy-find-contacts info))))
     (when (and (not no-confirm)
                (not (yes-or-no-p "Stop tracking this contact?")))
       (error "Aborted"))
@@ -438,7 +438,7 @@ If NAME is not provided, the user is prompted interactively."
     (setq interval
           (read-number (format "%s (days): " howdy-interval-property)
                        howdy-interval-default)))
-  (let ((contact (car (howdy--find-contacts `((:name . ,name))))))
+  (let ((contact (car (howdy-find-contacts `((:name . ,name))))))
     (if (null contact)
         (error (format "No contact %s found!" name))
       (howdy--with-contact
